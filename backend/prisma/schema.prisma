@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MEMBER
+}
+
+enum CompanyType {
+  AUTOMOBILE
+  RECYCLING
+  MANUFACTURING
+  OTHERS
+}
+
+enum MaterialStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole
+  companyId String?  @map("company_id")
+  company   Company? @relation(fields: [companyId], references: [id])
+  materials Material[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Company {
+  id        String      @id @default(uuid())
+  name      String
+  email     String      @unique
+  phone     String?
+  address   String?
+  type      CompanyType
+  users     User[]
+  materials Material[]
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  @@map("companies")
+}
+
+model Material {
+  id          String         @id @default(uuid())
+  name        String
+  description String?
+  quantity    Float
+  unit        String
+  price       Float?
+  status      MaterialStatus @default(PENDING)
+  userId      String         @map("user_id")
+  user        User           @relation(fields: [userId], references: [id])
+  companyId   String         @map("company_id")
+  company     Company        @relation(fields: [companyId], references: [id])
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  @@map("materials")
+}

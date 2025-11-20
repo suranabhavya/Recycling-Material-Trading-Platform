@@ -1,0 +1,44 @@
+# Backend
+backend/node_modules/
+backend/dist/
+backend/.env
+backend/npm-debug.log*
+
+# Frontend
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.packages
+frontend/build/
+frontend/pubspec.lock
+frontend/.metadata
+frontend/.flutter-plugins-dependencies
+
+# iOS
+frontend/ios/Pods/
+frontend/ios/Flutter/Generated.xcconfig
+frontend/ios/Flutter/ephemeral/
+frontend/ios/.symlinks/
+frontend/ios/Flutter/flutter_export_environment.sh
+
+# macOS
+frontend/macos/Flutter/ephemeral/
+frontend/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Android
+frontend/android/app/*.iml
+frontend/android/.gradle/
+frontend/android/local.properties
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+*.iml
+xcuserdata/
+
+# Logs
+*.log
+
