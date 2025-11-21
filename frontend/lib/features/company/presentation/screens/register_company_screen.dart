@@ -169,18 +169,82 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
                             value: _selectedType,
                             decoration: InputDecoration(
                               labelText: 'Company Type',
-                              labelStyle: TextStyle(color: Colors.white.withOpacityValue(0.8)),
+                              labelStyle: GoogleFonts.poppins(
+                                color: Colors.white.withOpacityValue(0.8),
+                                fontSize: 14,
+                              ),
                               prefixIcon: Icon(Icons.category, color: Colors.white.withOpacityValue(0.8)),
                               filled: true,
                               fillColor: Colors.white.withOpacityValue(0.1),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withOpacityValue(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: Colors.white,
+                                  width: 1.5,
+                                ),
+                              ),
                             ),
                             dropdownColor: AppColors.darkGreen,
-                            style: const TextStyle(color: Colors.white),
-                            items: const [
-                              DropdownMenuItem(value: 'AUTOMOBILE', child: Text('Automobile')),
-                              DropdownMenuItem(value: 'RECYCLING', child: Text('Recycling')),
-                              DropdownMenuItem(value: 'MANUFACTURING', child: Text('Manufacturing')),
-                              DropdownMenuItem(value: 'OTHERS', child: Text('Others')),
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.white.withOpacityValue(0.8),
+                            ),
+                            items: [
+                              DropdownMenuItem(
+                                value: 'AUTOMOBILE',
+                                child: Text(
+                                  'Automobile',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: 'RECYCLING',
+                                child: Text(
+                                  'Recycling',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: 'MANUFACTURING',
+                                child: Text(
+                                  'Manufacturing',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: 'OTHERS',
+                                child: Text(
+                                  'Others',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
                             ],
                             onChanged: (value) => setState(() => _selectedType = value!),
                           ),
@@ -215,7 +279,14 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
                               ),
                               child: companyState.isLoading
                                   ? const CircularProgressIndicator(color: Colors.white)
-                                  : Text('Register Company', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600)),
+                                  : Text(
+                                      'Register Company',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],

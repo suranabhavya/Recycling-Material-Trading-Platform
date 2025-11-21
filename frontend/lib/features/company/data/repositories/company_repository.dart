@@ -46,5 +46,32 @@ class CompanyRepository {
     );
     return response.data as Map<String, dynamic>;
   }
+
+  Future<List<Map<String, dynamic>>> getPendingApprovals(String companyId) async {
+    final token = await _storage.read(key: AppConstants.accessTokenKey);
+    final response = await _dio.get(
+      '${AppConstants.baseUrl}/companies/$companyId/pending-approvals',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return List<Map<String, dynamic>>.from(response.data as List);
+  }
+
+  Future<Map<String, dynamic>> approveUser(String userId) async {
+    final token = await _storage.read(key: AppConstants.accessTokenKey);
+    final response = await _dio.post(
+      '${AppConstants.baseUrl}/companies/approve/$userId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> rejectUser(String userId) async {
+    final token = await _storage.read(key: AppConstants.accessTokenKey);
+    final response = await _dio.post(
+      '${AppConstants.baseUrl}/companies/reject/$userId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return response.data as Map<String, dynamic>;
+  }
 }
 

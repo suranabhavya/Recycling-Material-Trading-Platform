@@ -115,7 +115,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   
                   GlassmorphicContainer(
                     width: double.infinity,
-                    height: 450,
+                    height: 350,
                     borderRadius: 24,
                     blur: 20,
                     alignment: Alignment.center,
