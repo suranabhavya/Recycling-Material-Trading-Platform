@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glassmorphism/glassmorphism.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recycling_platform/core/router/app_router.dart';
 import 'package:recycling_platform/core/theme/app_colors.dart';
+import 'package:recycling_platform/core/utils/color_extensions.dart';
 import 'package:recycling_platform/features/auth/presentation/providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -49,6 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Welcome ${next.user!.name}!'), backgroundColor: AppColors.success),
         );
+        context.go(AppRouter.home);
       }
     });
 
@@ -66,10 +70,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withOpacityValue(0.2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withOpacityValue(0.3),
                           blurRadius: 20,
                           spreadRadius: 5,
                         ),
@@ -101,7 +105,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     'Sign in to continue',
                     style: GoogleFonts.poppins(
                       fontSize: 16,
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withOpacityValue(0.8),
                     ),
                   )
                       .animate()
@@ -118,16 +122,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     border: 2,
                     linearGradient: LinearGradient(
                       colors: [
-                        Colors.white.withOpacity(0.2),
-                        Colors.white.withOpacity(0.1),
+                        Colors.white.withOpacityValue(0.2),
+                        Colors.white.withOpacityValue(0.1),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderGradient: LinearGradient(
                       colors: [
-                        Colors.white.withOpacity(0.5),
-                        Colors.white.withOpacity(0.2),
+                        Colors.white.withOpacityValue(0.5),
+                        Colors.white.withOpacityValue(0.2),
                       ],
                     ),
                     child: Padding(
@@ -141,10 +145,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 labelText: 'Email',
-                                labelStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
-                                prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.8)),
+                                labelStyle: TextStyle(color: Colors.white.withOpacityValue(0.8)),
+                                prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacityValue(0.8)),
                                 filled: true,
-                                fillColor: Colors.white.withOpacity(0.1),
+                                fillColor: Colors.white.withOpacityValue(0.1),
                               ),
                               validator: (value) {
                                 if (value?.isEmpty ?? true) return 'Email required';
@@ -164,17 +168,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               style: const TextStyle(color: Colors.white),
                               decoration: InputDecoration(
                                 labelText: 'Password',
-                                labelStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
-                                prefixIcon: Icon(Icons.lock_outline, color: Colors.white.withOpacity(0.8)),
+                                labelStyle: TextStyle(color: Colors.white.withOpacityValue(0.8)),
+                                prefixIcon: Icon(Icons.lock_outline, color: Colors.white.withOpacityValue(0.8)),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withOpacityValue(0.8),
                                   ),
                                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                                 ),
                                 filled: true,
-                                fillColor: Colors.white.withOpacity(0.1),
+                                fillColor: Colors.white.withOpacityValue(0.1),
                               ),
                               validator: (value) {
                                 if (value?.isEmpty ?? true) return 'Password required';
@@ -191,7 +195,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Align(
                               alignment: Alignment.centerRight,
                               child: TextButton(
-                                onPressed: () {},
+                                onPressed: () => context.go(AppRouter.forgotPassword),
                                 child: Text(
                                   'Forgot Password?',
                                   style: GoogleFonts.poppins(
@@ -214,7 +218,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withOpacity(0.5),
+                                    color: AppColors.primary.withOpacityValue(0.5),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -267,10 +271,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       Text(
                         "Don't have an account? ",
-                        style: GoogleFonts.poppins(color: Colors.white.withOpacity(0.8)),
+                        style: GoogleFonts.poppins(color: Colors.white.withOpacityValue(0.8)),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () => context.go(AppRouter.register),
                         child: Text(
                           'Sign Up',
                           style: GoogleFonts.poppins(

@@ -1,10 +1,26 @@
 import 'package:go_router/go_router.dart';
+import 'package:recycling_platform/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:recycling_platform/features/auth/presentation/screens/login_screen.dart';
+import 'package:recycling_platform/features/auth/presentation/screens/register_screen.dart';
+import 'package:recycling_platform/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:recycling_platform/features/auth/presentation/screens/splash_screen.dart';
+import 'package:recycling_platform/features/auth/presentation/screens/verify_otp_screen.dart';
+import 'package:recycling_platform/features/company/presentation/screens/company_selection_screen.dart';
+import 'package:recycling_platform/features/company/presentation/screens/pending_approval_screen.dart';
+import 'package:recycling_platform/features/company/presentation/screens/register_company_screen.dart';
+import 'package:recycling_platform/features/home/presentation/screens/home_screen.dart';
 
 class AppRouter {
   static const String splash = '/';
   static const String login = '/login';
+  static const String register = '/register';
+  static const String verifyOtp = '/verify-otp';
+  static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
+  static const String companySelection = '/company-selection';
+  static const String registerCompany = '/register-company';
+  static const String pendingApproval = '/pending-approval';
+  static const String home = '/home';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -16,6 +32,44 @@ class AppRouter {
       GoRoute(
         path: login,
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: register,
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: verifyOtp,
+        builder: (context, state) {
+          final email = state.uri.queryParameters['email'] ?? '';
+          return VerifyOtpScreen(email: email);
+        },
+      ),
+      GoRoute(
+        path: forgotPassword,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: resetPassword,
+        builder: (context, state) {
+          final email = state.uri.queryParameters['email'] ?? '';
+          return ResetPasswordScreen(email: email);
+        },
+      ),
+      GoRoute(
+        path: companySelection,
+        builder: (context, state) => const CompanySelectionScreen(),
+      ),
+      GoRoute(
+        path: registerCompany,
+        builder: (context, state) => const RegisterCompanyScreen(),
+      ),
+      GoRoute(
+        path: pendingApproval,
+        builder: (context, state) => const PendingApprovalScreen(),
+      ),
+      GoRoute(
+        path: home,
+        builder: (context, state) => const HomeScreen(),
       ),
     ],
   );

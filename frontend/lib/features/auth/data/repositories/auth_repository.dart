@@ -9,6 +9,35 @@ class AuthRepository {
 
   AuthRepository(this._dio, this._storage);
 
+  Future<void> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    await _dio.post(
+      '${AppConstants.baseUrl}/auth/register',
+      data: {'name': name, 'email': email, 'password': password},
+    );
+  }
+
+  Future<AuthResponse> verifyOtp(String email, String otp) async {
+    final response = await _dio.post(
+      '${AppConstants.baseUrl}/auth/verify-otp',
+      data: {'email': email, 'otp': otp},
+    );
+
+    final authResponse = AuthResponse.fromJson(response.data);
+    await _storage.write(key: AppConstants.accessTokenKey, value: authResponse.token);
+    return authResponse;
+  }
+
+  Future<void> resendOtp(String email) async {
+    await _dio.post(
+      '${AppConstants.baseUrl}/auth/resend-otp',
+      data: {'email': email},
+    );
+  }
+
   Future<AuthResponse> login(String email, String password) async {
     final response = await _dio.post(
       '${AppConstants.baseUrl}/auth/login',
@@ -20,27 +49,18 @@ class AuthRepository {
     return authResponse;
   }
 
-  Future<AuthResponse> register({
-    required String email,
-    required String password,
-    required String name,
-    required String role,
-    String? companyId,
-  }) async {
-    final response = await _dio.post(
-      '${AppConstants.baseUrl}/auth/register',
-      data: {
-        'email': email,
-        'password': password,
-        'name': name,
-        'role': role,
-        if (companyId != null) 'companyId': companyId,
-      },
+  Future<void> forgotPassword(String email) async {
+    await _dio.post(
+      '${AppConstants.baseUrl}/auth/forgot-password',
+      data: {'email': email},
     );
+  }
 
-    final authResponse = AuthResponse.fromJson(response.data);
-    await _storage.write(key: AppConstants.accessTokenKey, value: authResponse.token);
-    return authResponse;
+  Future<void> resetPassword(String email, String otp, String password) async {
+    await _dio.post(
+      '${AppConstants.baseUrl}/auth/reset-password',
+      data: {'email': email, 'otp': otp, 'password': password},
+    );
   }
 
   Future<void> logout() async {
@@ -51,4 +71,3 @@ class AuthRepository {
     return await _storage.read(key: AppConstants.accessTokenKey);
   }
 }
-

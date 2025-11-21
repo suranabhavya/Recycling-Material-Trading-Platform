@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recycling_platform/core/router/app_router.dart';
 import 'package:recycling_platform/core/theme/app_colors.dart';
+import 'package:recycling_platform/core/utils/color_extensions.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -47,10 +48,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withOpacityValue(0.2),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withOpacityValue(0.3),
                       blurRadius: 30,
                       spreadRadius: 10,
                     ),
@@ -65,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   .animate(onPlay: (controller) => controller.repeat(reverse: true))
                   .scale(duration: 2000.ms, begin: const Offset(1, 1), end: const Offset(1.1, 1.1))
                   .then()
-                  .shimmer(duration: 1500.ms, color: Colors.white.withOpacity(0.5)),
+                  .shimmer(duration: 1500.ms, color: Colors.white.withOpacityValue(0.5)),
               
               const SizedBox(height: 40),
               
@@ -89,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w300,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withOpacityValue(0.9),
                   letterSpacing: 3,
                 ),
               )
@@ -104,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 height: 60,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withOpacity(0.8)),
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withOpacityValue(0.8)),
                 ),
               )
                   .animate(onPlay: (controller) => controller.repeat())

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recycling_platform/core/utils/color_extensions.dart';
 import 'app_colors.dart';
 
 class AppTheme {
@@ -31,7 +32,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
         ),
         elevation: 8,
-        shadowColor: AppColors.primary.withOpacity(0.5),
+        shadowColor: AppColors.primary.withOpacityValue(0.5),
         textStyle: GoogleFonts.poppins(
           fontSize: 16,
           fontWeight: FontWeight.w600,
@@ -40,7 +41,7 @@ class AppTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white.withOpacity(0.9),
+      fillColor: Colors.white.withOpacityValue(0.9),
       contentPadding: const EdgeInsets.all(20),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
@@ -48,7 +49,7 @@ class AppTheme {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        borderSide: BorderSide(color: Colors.white.withOpacityValue(0.3)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),

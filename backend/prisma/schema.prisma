@@ -25,17 +25,25 @@ enum MaterialStatus {
   REJECTED
 }
 
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  role      UserRole
-  companyId String?  @map("company_id")
-  company   Company? @relation(fields: [companyId], references: [id])
-  materials Material[]
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                      String          @id @default(uuid())
+  email                   String          @unique
+  password                String
+  name                    String
+  role                    UserRole?
+  isVerified              Boolean         @default(false) @map("is_verified")
+  companyId               String?         @map("company_id")
+  company                 Company?        @relation(fields: [companyId], references: [id])
+  companyApprovalStatus   ApprovalStatus? @default(PENDING) @map("company_approval_status")
+  materials               Material[]
+  createdAt               DateTime        @default(now()) @map("created_at")
+  updatedAt               DateTime        @updatedAt @map("updated_at")
 
   @@map("users")
 }
@@ -71,4 +79,16 @@ model Material {
   updatedAt   DateTime       @updatedAt @map("updated_at")
 
   @@map("materials")
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  email     String
+  otp       String
+  type      String   // 'verification' or 'reset_password'
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("otps")
+  @@index([email, type])
 }
