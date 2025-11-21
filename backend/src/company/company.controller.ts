@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Request, Patch } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { JoinCompanyDto } from './dto/join-company.dto';
+import { UserRole } from '@prisma/client';
 
 @Controller('companies')
 export class CompanyController {
@@ -46,6 +47,28 @@ export class CompanyController {
   @UseGuards(AuthGuard('jwt'))
   rejectUser(@Param('userId') userId: string, @Request() req: { user: any }) {
     return this.companyService.rejectUser(userId, req.user.id);
+  }
+
+  @Get(':id/members')
+  @UseGuards(AuthGuard('jwt'))
+  getCompanyMembers(@Param('id') id: string) {
+    return this.companyService.getCompanyMembers(id);
+  }
+
+  @Patch('update-role/:userId')
+  @UseGuards(AuthGuard('jwt'))
+  updateUserRole(
+    @Param('userId') userId: string,
+    @Body('role') role: UserRole,
+    @Request() req: { user: any },
+  ) {
+    return this.companyService.updateUserRole(userId, role, req.user.id);
+  }
+
+  @Post('kick/:userId')
+  @UseGuards(AuthGuard('jwt'))
+  kickMember(@Param('userId') userId: string, @Request() req: { user: any }) {
+    return this.companyService.kickMember(userId, req.user.id);
   }
 }
 

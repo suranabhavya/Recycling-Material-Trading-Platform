@@ -73,5 +73,33 @@ class CompanyRepository {
     );
     return response.data as Map<String, dynamic>;
   }
+
+  Future<List<Map<String, dynamic>>> getCompanyMembers(String companyId) async {
+    final token = await _storage.read(key: AppConstants.accessTokenKey);
+    final response = await _dio.get(
+      '${AppConstants.baseUrl}/companies/$companyId/members',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return List<Map<String, dynamic>>.from(response.data as List);
+  }
+
+  Future<Map<String, dynamic>> updateUserRole(String userId, String role) async {
+    final token = await _storage.read(key: AppConstants.accessTokenKey);
+    final response = await _dio.patch(
+      '${AppConstants.baseUrl}/companies/update-role/$userId',
+      data: {'role': role},
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> kickMember(String userId) async {
+    final token = await _storage.read(key: AppConstants.accessTokenKey);
+    final response = await _dio.post(
+      '${AppConstants.baseUrl}/companies/kick/$userId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return response.data as Map<String, dynamic>;
+  }
 }
 

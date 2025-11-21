@@ -168,13 +168,90 @@ export class CompanyService {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        companyId: null,
-        role: null,
-        companyApprovalStatus: null,
+        companyApprovalStatus: ApprovalStatus.REJECTED,
       },
     });
 
-    return { message: 'User rejected and removed from company' };
+    return { message: 'User rejected' };
+  }
+
+  async getCompanyMembers(companyId: string) {
+    return this.prisma.user.findMany({
+      where: {
+        companyId,
+        companyApprovalStatus: ApprovalStatus.APPROVED,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  async updateUserRole(userId: string, newRole: UserRole, adminId: string) {
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+    });
+
+    if (admin?.role !== UserRole.ADMIN) {
+      throw new BadRequestException('Only admins can update user roles');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || user.companyId !== admin.companyId) {
+      throw new BadRequestException('User not from your company');
+    }
+
+    if (user.role === UserRole.ADMIN) {
+      throw new BadRequestException('Cannot change the role of another admin');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { role: newRole },
+    });
+
+    return { message: `User role updated to ${newRole}` };
+  }
+
+  async kickMember(userId: string, adminId: string) {
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+    });
+
+    if (admin?.role !== UserRole.ADMIN) {
+      throw new BadRequestException('Only admins can kick members');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || user.companyId !== admin.companyId) {
+      throw new BadRequestException('User not from your company');
+    }
+
+    if (user.role === UserRole.ADMIN) {
+      throw new BadRequestException('Cannot kick another admin');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        companyApprovalStatus: ApprovalStatus.REJECTED,
+      },
+    });
+
+    return { message: 'User kicked from company' };
   }
 }
 
