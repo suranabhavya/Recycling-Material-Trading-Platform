@@ -16,6 +16,7 @@ import 'package:recycling_platform/features/profile/presentation/screens/notific
 import 'package:recycling_platform/features/profile/presentation/screens/personal_settings_screen.dart';
 import 'package:recycling_platform/features/profile/presentation/screens/privacy_settings_screen.dart';
 import 'package:recycling_platform/features/profile/presentation/screens/team_management_screen.dart';
+import 'package:recycling_platform/features/profile/presentation/screens/team_member_detail_screen.dart';
 
 class AppRouter {
   static const String splash = '/';
@@ -32,6 +33,7 @@ class AppRouter {
   static const String personalSettings = '/personal-settings';
   static const String companySettings = '/company-settings';
   static const String teamManagement = '/team-management';
+  static const String teamMemberDetail = '/team-member-detail';
   static const String notificationSettings = '/notification-settings';
   static const String privacySettings = '/privacy-settings';
   static const String helpSupport = '/help-support';
@@ -100,6 +102,19 @@ class AppRouter {
       GoRoute(
         path: teamManagement,
         builder: (context, state) => const TeamManagementScreen(),
+      ),
+      GoRoute(
+        path: teamMemberDetail,
+        builder: (context, state) {
+          final member = state.extra as Map<String, dynamic>;
+          return TeamMemberDetailScreen(
+            memberId: member['id'] as String,
+            memberName: member['name'] as String,
+            memberEmail: member['email'] as String,
+            memberRole: member['role'] as String? ?? 'MEMBER',
+            createdAt: member['createdAt'] as String?,
+          );
+        },
       ),
       GoRoute(
         path: notificationSettings,

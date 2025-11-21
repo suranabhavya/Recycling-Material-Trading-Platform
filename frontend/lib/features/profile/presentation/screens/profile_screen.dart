@@ -8,8 +8,34 @@ import 'package:recycling_platform/core/theme/app_colors.dart';
 import 'package:recycling_platform/core/utils/color_extensions.dart';
 import 'package:recycling_platform/features/auth/presentation/providers/auth_provider.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _isRefreshing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Refresh user data when profile screen is loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshUserData();
+    });
+  }
+
+  Future<void> _refreshUserData() async {
+    if (_isRefreshing) return;
+    
+    setState(() => _isRefreshing = true);
+    await ref.read(authProvider.notifier).refreshUser();
+    if (mounted) {
+      setState(() => _isRefreshing = false);
+    }
+  }
 
   Color _getStatusColor(String? status) {
     switch (status?.toUpperCase()) {
@@ -37,24 +63,84 @@ class ProfileScreen extends ConsumerWidget {
     }
   }
 
+  Color _getRoleColor(String? role) {
+    switch (role?.toUpperCase()) {
+      case 'ADMIN':
+        return Colors.orange;
+      case 'LEAD':
+        return Colors.purple;
+      case 'MEMBER':
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getRoleIcon(String? role) {
+    switch (role?.toUpperCase()) {
+      case 'ADMIN':
+        return Icons.admin_panel_settings;
+      case 'LEAD':
+        return Icons.stars;
+      case 'MEMBER':
+        return Icons.person_outline;
+      default:
+        return Icons.person_outline;
+    }
+  }
+
+  String _getRoleDisplayName(String? role) {
+    switch (role?.toUpperCase()) {
+      case 'ADMIN':
+        return 'ADMIN';
+      case 'LEAD':
+        return 'LEAD';
+      case 'MEMBER':
+        return 'MEMBER';
+      default:
+        return 'MEMBER';
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final isAdmin = user?.role?.toUpperCase() == 'ADMIN';
+    final userRole = user?.role;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Profile',
-            style: GoogleFonts.poppins(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Profile',
+                  style: GoogleFonts.poppins(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: _isRefreshing 
+                    ? SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.refresh, color: Colors.white),
+                onPressed: _isRefreshing ? null : _refreshUserData,
+                tooltip: 'Refresh profile data',
+              ),
+            ],
           ).animate().fadeIn(duration: 600.ms),
           
           const SizedBox(height: 8),
@@ -141,10 +227,10 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 Expanded(
                   child: _buildInfoCard(
-                    icon: isAdmin ? Icons.admin_panel_settings : Icons.person_outline,
+                    icon: _getRoleIcon(userRole),
                     label: 'Role',
-                    value: isAdmin ? 'ADMIN' : 'MEMBER',
-                    color: isAdmin ? Colors.orange : Colors.blue,
+                    value: _getRoleDisplayName(userRole),
+                    color: _getRoleColor(userRole),
                   ),
                 ),
                 if (user.company != null) ...[

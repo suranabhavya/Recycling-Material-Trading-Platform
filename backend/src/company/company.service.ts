@@ -215,10 +215,15 @@ export class CompanyService {
       throw new BadRequestException('Cannot change the role of another admin');
     }
 
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { role: newRole },
-    });
+    // Validate role transitions
+    if (newRole === UserRole.ADMIN || newRole === UserRole.LEAD || newRole === UserRole.MEMBER) {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { role: newRole },
+      });
+    } else {
+      throw new BadRequestException('Invalid role');
+    }
 
     return { message: `User role updated to ${newRole}` };
   }

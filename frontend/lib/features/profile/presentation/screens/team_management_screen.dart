@@ -66,124 +66,6 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
     }
   }
 
-  Future<void> _promoteToAdmin(String userId, String userName) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkGreen,
-        title: Text(
-          'Promote to Admin',
-          style: GoogleFonts.poppins(color: Colors.white),
-        ),
-        content: Text(
-          'Are you sure you want to promote $userName to Admin? They will have full access to manage the company.',
-          style: GoogleFonts.poppins(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(color: Colors.white70),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'Promote',
-              style: GoogleFonts.poppins(color: Colors.orange),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    try {
-      final repository = ref.read(companyRepositoryProvider);
-      await repository.updateUserRole(userId, 'ADMIN');
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$userName promoted to Admin!'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-        _loadMembers(); // Reload the list
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to promote user: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _kickMember(String userId, String userName) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkGreen,
-        title: Text(
-          'Kick Member',
-          style: GoogleFonts.poppins(color: Colors.white),
-        ),
-        content: Text(
-          'Are you sure you want to kick $userName from the company? Their approval status will be set to REJECTED.',
-          style: GoogleFonts.poppins(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(color: Colors.white70),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'Kick',
-              style: GoogleFonts.poppins(color: AppColors.error),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    try {
-      final repository = ref.read(companyRepositoryProvider);
-      await repository.kickMember(userId);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$userName has been kicked from the company'),
-            backgroundColor: AppColors.warning,
-          ),
-        );
-        _loadMembers(); // Reload the list
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to kick member: ${e.toString()}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider).user;
@@ -507,6 +389,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                           name: member['name'] as String,
                                           email: member['email'] as String,
                                           role: member['role'] as String?,
+                                          createdAt: member['createdAt'] as String?,
                                           isCurrentUser: isCurrentUser,
                                           isMemberAdmin: isMemberAdmin,
                                         ).animate().fadeIn(
@@ -527,169 +410,169 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
     );
   }
 
+  Color _getRoleColor(String? role) {
+    switch (role?.toUpperCase()) {
+      case 'ADMIN':
+        return Colors.orange;
+      case 'LEAD':
+        return Colors.purple;
+      case 'MEMBER':
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getRoleIcon(String? role) {
+    switch (role?.toUpperCase()) {
+      case 'ADMIN':
+        return Icons.admin_panel_settings;
+      case 'LEAD':
+        return Icons.stars;
+      case 'MEMBER':
+        return Icons.person;
+      default:
+        return Icons.person_outline;
+    }
+  }
+
+  Future<void> _navigateToMemberDetail(Map<String, dynamic> member) async {
+    final result = await context.push(
+      '/team-member-detail',
+      extra: member,
+    );
+    
+    // Refresh if changes were made
+    if (result == true) {
+      _loadMembers();
+    }
+  }
+
   Widget _buildMemberCard({
     required String id,
     required String name,
     required String email,
     String? role,
+    String? createdAt,
     required bool isCurrentUser,
     required bool isMemberAdmin,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withOpacityValue(0.2),
-            Colors.white.withOpacityValue(0.1),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return GestureDetector(
+      onTap: () => _navigateToMemberDetail({
+        'id': id,
+        'name': name,
+        'email': email,
+        'role': role,
+        'createdAt': createdAt,
+      }),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.white.withOpacityValue(0.2),
+              Colors.white.withOpacityValue(0.1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.white.withOpacityValue(0.3),
+            width: 1.5,
+          ),
         ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withOpacityValue(0.3),
-          width: 1.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white.withOpacityValue(0.3),
-                      Colors.white.withOpacityValue(0.1),
-                    ],
-                  ),
-                ),
-                child: Icon(
-                  isMemberAdmin ? Icons.admin_panel_settings : Icons.person,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            name,
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        if (isCurrentUser) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacityValue(0.3),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'You',
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      email,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.white.withOpacityValue(0.7),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isMemberAdmin 
-                            ? Colors.orange.withOpacityValue(0.3) 
-                            : Colors.blue.withOpacityValue(0.3),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        role?.toUpperCase() ?? 'MEMBER',
-                        style: GoogleFonts.poppins(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    _getRoleColor(role).withOpacityValue(0.3),
+                    _getRoleColor(role).withOpacityValue(0.1),
                   ],
                 ),
               ),
-            ],
-          ),
-          
-          // Action buttons (only show for non-current user and non-admin members)
-          if (!isCurrentUser && !isMemberAdmin) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _kickMember(id, name),
-                    icon: const Icon(Icons.person_remove, size: 18),
-                    label: Text(
-                      'Kick',
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+              child: Icon(
+                _getRoleIcon(role),
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          name,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      if (isCurrentUser) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacityValue(0.3),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'You',
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    email,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.white.withOpacityValue(0.7),
                     ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      side: BorderSide(color: AppColors.error),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getRoleColor(role).withOpacityValue(0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      role?.toUpperCase() ?? 'MEMBER',
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _promoteToAdmin(id, name),
-                    icon: const Icon(Icons.arrow_upward, size: 18),
-                    label: Text(
-                      'Promote',
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white.withOpacityValue(0.5),
+              size: 20,
             ),
           ],
-        ],
+        ),
       ),
     );
   }
