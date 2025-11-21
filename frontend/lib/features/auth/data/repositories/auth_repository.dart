@@ -63,6 +63,15 @@ class AuthRepository {
     );
   }
 
+  Future<UserModel> getCurrentUser() async {
+    final token = await _storage.read(key: AppConstants.accessTokenKey);
+    final response = await _dio.get(
+      '${AppConstants.baseUrl}/auth/me',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return UserModel.fromJson(response.data);
+  }
+
   Future<void> logout() async {
     await _storage.delete(key: AppConstants.accessTokenKey);
   }

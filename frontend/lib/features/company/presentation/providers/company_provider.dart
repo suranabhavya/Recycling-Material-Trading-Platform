@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:recycling_platform/features/auth/presentation/providers/auth_provider.dart';
 import 'package:recycling_platform/features/company/data/models/company_model.dart';
 import 'package:recycling_platform/features/company/data/repositories/company_repository.dart';
 
@@ -44,8 +45,9 @@ class CompanyState {
 
 class CompanyNotifier extends StateNotifier<CompanyState> {
   final CompanyRepository _repository;
+  final Ref _ref;
 
-  CompanyNotifier(this._repository) : super(CompanyState());
+  CompanyNotifier(this._repository, this._ref) : super(CompanyState());
 
   Future<void> loadCompanies() async {
     state = state.copyWith(isLoading: true, error: null);
@@ -82,6 +84,10 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
         address: address,
         type: type,
       );
+      
+      // Refresh user data to get updated role and status
+      await _ref.read(authProvider.notifier).refreshUser();
+      
       state = state.copyWith(isLoading: false);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -113,6 +119,10 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await _repository.joinCompany(companyId);
+      
+      // Refresh user data to get updated company and status
+      await _ref.read(authProvider.notifier).refreshUser();
+      
       state = state.copyWith(isLoading: false);
       if (context.mounted) {
         context.go('/pending-approval');
@@ -139,6 +149,6 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
 }
 
 final companyProvider = StateNotifierProvider<CompanyNotifier, CompanyState>((ref) {
-  return CompanyNotifier(ref.watch(companyRepositoryProvider));
+  return CompanyNotifier(ref.watch(companyRepositoryProvider), ref);
 });
 
