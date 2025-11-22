@@ -21,7 +21,17 @@ enum CompanyType {
 }
 
 enum MaterialStatus {
-  PENDING
+  PENDING_LEAD_APPROVAL
+  APPROVED_BY_LEAD
+  REJECTED_BY_LEAD
+  PENDING_ADMIN_APPROVAL
+  APPROVED_BY_ADMIN
+  REJECTED_BY_ADMIN
+}
+
+enum BatchStatus {
+  DRAFT
+  SUBMITTED
   APPROVED
   REJECTED
 }
@@ -42,7 +52,24 @@ model User {
   companyId               String?         @map("company_id")
   company                 Company?        @relation(fields: [companyId], references: [id])
   companyApprovalStatus   ApprovalStatus? @default(PENDING) @map("company_approval_status")
-  materials               Material[]
+  
+  // Member → Lead relationship
+  leadId                  String?         @map("lead_id")
+  lead                    User?           @relation("LeadMembers", fields: [leadId], references: [id], onDelete: SetNull)
+  teamMembers             User[]          @relation("LeadMembers")
+  
+  // User's materials
+  materials               Material[]      @relation("UserMaterials")
+  
+  // Materials approved by this lead
+  approvedMaterials       Material[]      @relation("LeadApprovals")
+  
+  // Batches created by this lead
+  createdBatches          MaterialBatch[] @relation("BatchCreator")
+  
+  // Batches reviewed by this admin
+  reviewedBatches         MaterialBatch[] @relation("BatchReviewer")
+  
   createdAt               DateTime        @default(now()) @map("created_at")
   updatedAt               DateTime        @updatedAt @map("updated_at")
 
@@ -50,37 +77,81 @@ model User {
 }
 
 model Company {
-  id        String      @id @default(uuid())
-  name      String
-  email     String      @unique
-  phone     String?
-  address   String?
-  type      CompanyType
-  users     User[]
-  materials Material[]
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  phone          String?
+  address        String?
+  type           CompanyType
+  users          User[]
+  materials      Material[]
+  materialBatches MaterialBatch[]
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
 
   @@map("companies")
 }
 
 model Material {
-  id          String         @id @default(uuid())
-  name        String
-  description String?
-  quantity    Float
-  unit        String
-  price       Float?
-  images      String[]       @default([])
-  status      MaterialStatus @default(PENDING)
-  userId      String         @map("user_id")
-  user        User           @relation(fields: [userId], references: [id])
-  companyId   String         @map("company_id")
-  company     Company        @relation(fields: [companyId], references: [id])
-  createdAt   DateTime       @default(now()) @map("created_at")
-  updatedAt   DateTime       @updatedAt @map("updated_at")
+  id              String         @id @default(uuid())
+  name            String
+  description     String?
+  quantity        Float
+  unit            String
+  price           Float?
+  images          String[]       @default([])
+  status          MaterialStatus @default(PENDING_LEAD_APPROVAL)
+  
+  // Creator of the material
+  userId          String         @map("user_id")
+  user            User           @relation("UserMaterials", fields: [userId], references: [id])
+  
+  // Company
+  companyId       String         @map("company_id")
+  company         Company        @relation(fields: [companyId], references: [id])
+  
+  // Lead who approved this material
+  leadId          String?        @map("lead_id")
+  lead            User?          @relation("LeadApprovals", fields: [leadId], references: [id], onDelete: SetNull)
+  leadApprovedAt  DateTime?      @map("lead_approved_at")
+  
+  // Batch this material belongs to
+  batchId         String?        @map("batch_id")
+  batch           MaterialBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
 
   @@map("materials")
+}
+
+model MaterialBatch {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  status      BatchStatus @default(DRAFT)
+  
+  // Lead who created the batch
+  leadId      String      @map("lead_id")
+  lead        User        @relation("BatchCreator", fields: [leadId], references: [id])
+  
+  // Company
+  companyId   String      @map("company_id")
+  company     Company     @relation(fields: [companyId], references: [id])
+  
+  // Materials in this batch
+  materials   Material[]
+  
+  // Submission and review tracking
+  submittedAt DateTime?   @map("submitted_at")
+  reviewedAt  DateTime?   @map("reviewed_at")
+  reviewedBy  String?     @map("reviewed_by")
+  reviewer    User?       @relation("BatchReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("material_batches")
 }
 
 model Otp {

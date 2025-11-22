@@ -70,5 +70,58 @@ export class CompanyController {
   kickMember(@Param('userId') userId: string, @Request() req: { user: any }) {
     return this.companyService.kickMember(userId, req.user.id);
   }
+
+  // Assign a lead to a member
+  @Patch('assign-lead/:memberId')
+  @UseGuards(AuthGuard('jwt'))
+  assignLead(
+    @Param('memberId') memberId: string,
+    @Body('leadId') leadId: string,
+    @Request() req: { user: any },
+  ) {
+    return this.companyService.assignLead(memberId, leadId, req.user.id);
+  }
+
+  // Get team members for a lead
+  @Get('team/my-members')
+  @UseGuards(AuthGuard('jwt'))
+  getMyTeamMembers(@Request() req: { user: any }) {
+    return this.companyService.getTeamMembers(req.user.id);
+  }
+
+  // Get all leads in company
+  @Get(':id/leads')
+  @UseGuards(AuthGuard('jwt'))
+  getCompanyLeads(@Param('id') id: string) {
+    return this.companyService.getCompanyLeads(id);
+  }
+
+  // Get company hierarchy
+  @Get(':id/hierarchy')
+  @UseGuards(AuthGuard('jwt'))
+  getCompanyHierarchy(@Param('id') id: string) {
+    return this.companyService.getCompanyHierarchy(id);
+  }
+
+  // Assign member to lead
+  @Patch('assign-lead')
+  @UseGuards(AuthGuard('jwt'))
+  assignMemberToLead(
+    @Body('memberId') memberId: string,
+    @Body('leadId') leadId: string,
+    @Request() req: { user: any },
+  ) {
+    return this.companyService.assignMemberToLead(memberId, leadId, req.user.id);
+  }
+
+  // Unassign member from lead
+  @Patch('unassign-lead/:memberId')
+  @UseGuards(AuthGuard('jwt'))
+  unassignMemberFromLead(
+    @Param('memberId') memberId: string,
+    @Request() req: { user: any },
+  ) {
+    return this.companyService.unassignMemberFromLead(memberId, req.user.id);
+  }
 }
 

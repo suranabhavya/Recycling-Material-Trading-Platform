@@ -60,5 +60,48 @@ class MaterialRepository {
       throw Exception('Failed to delete material: $e');
     }
   }
+
+  // Lead-specific methods
+  Future<List<MaterialModel>> getPendingLeadApproval() async {
+    try {
+      final response = await _dio.get('/materials/pending-lead-approval');
+
+      final List<dynamic> data = response.data as List;
+      return data.map((json) => MaterialModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch pending materials: $e');
+    }
+  }
+
+  Future<MaterialModel> leadApproveMaterial(String materialId) async {
+    try {
+      final response = await _dio.patch('/materials/$materialId/lead-approve');
+
+      return MaterialModel.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Failed to approve material: $e');
+    }
+  }
+
+  Future<MaterialModel> leadRejectMaterial(String materialId) async {
+    try {
+      final response = await _dio.patch('/materials/$materialId/lead-reject');
+
+      return MaterialModel.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Failed to reject material: $e');
+    }
+  }
+
+  Future<List<MaterialModel>> getApprovedMaterials() async {
+    try {
+      final response = await _dio.get('/materials/approved-for-batching');
+
+      final List<dynamic> data = response.data as List;
+      return data.map((json) => MaterialModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch approved materials: $e');
+    }
+  }
 }
 

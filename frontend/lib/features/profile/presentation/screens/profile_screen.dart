@@ -284,6 +284,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             
             const SizedBox(height: 12),
             
+            // Lead Dashboard (Lead Only)
+            if (userRole?.toUpperCase() == 'LEAD') ...[
+              _buildSettingsButton(
+                icon: Icons.dashboard_outlined,
+                label: 'Lead Dashboard',
+                subtitle: 'Approve team materials',
+                onTap: () => context.push(AppRouter.leadDashboard),
+                badgeText: 'LEAD',
+                badgeColor: Colors.purple,
+              ).animate().fadeIn(duration: 600.ms, delay: 475.ms),
+              
+              const SizedBox(height: 12),
+            ],
+            
             // Company Settings (Admin Only)
             if (isAdmin) ...[
               _buildSettingsButton(
@@ -318,6 +332,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 badgeText: 'ADMIN',
                 badgeColor: Colors.orange,
               ).animate().fadeIn(duration: 600.ms, delay: 550.ms),
+              
+              const SizedBox(height: 12),
+              
+              // Hierarchy Management (Admin Only)
+              _buildSettingsButton(
+                icon: Icons.account_tree_outlined,
+                label: 'Team Hierarchy',
+                subtitle: 'Assign members to leads',
+                onTap: () => context.push(AppRouter.hierarchyManagement),
+                badgeText: 'ADMIN',
+                badgeColor: Colors.orange,
+              ).animate().fadeIn(duration: 600.ms, delay: 575.ms),
+              
+              const SizedBox(height: 12),
+              
+              // Batch Approvals (Admin Only)
+              _buildSettingsButton(
+                icon: Icons.approval_outlined,
+                label: 'Batch Approvals',
+                subtitle: 'Review and approve batches',
+                onTap: () => context.push(AppRouter.adminBatchApproval),
+                badgeText: 'ADMIN',
+                badgeColor: Colors.orange,
+              ).animate().fadeIn(duration: 600.ms, delay: 600.ms),
               
               const SizedBox(height: 12),
             ],

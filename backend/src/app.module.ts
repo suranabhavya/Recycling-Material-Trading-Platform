@@ -6,6 +6,7 @@ import { CompanyModule } from './company/company.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { UploadModule } from './upload/upload.module';
 import { MaterialModule } from './material/material.module';
+import { BatchModule } from './batch/batch.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { MaterialModule } from './material/material.module';
     CloudinaryModule,
     UploadModule,
     MaterialModule,
+    BatchModule,
   ],
 })
 export class AppModule {}

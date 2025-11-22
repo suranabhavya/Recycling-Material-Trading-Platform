@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:recycling_platform/core/constants/app_constants.dart';
 import 'package:recycling_platform/features/company/data/models/company_model.dart';
+import 'package:recycling_platform/features/company/data/models/company_hierarchy_model.dart';
 
 class CompanyRepository {
   final Dio _dio;
@@ -97,6 +98,41 @@ class CompanyRepository {
     final token = await _storage.read(key: AppConstants.accessTokenKey);
     final response = await _dio.post(
       '${AppConstants.baseUrl}/companies/kick/$userId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  // Hierarchy Management Methods
+  Future<CompanyHierarchyModel> getCompanyHierarchy(String companyId) async {
+    final token = await _storage.read(key: AppConstants.accessTokenKey);
+    final response = await _dio.get(
+      '${AppConstants.baseUrl}/companies/$companyId/hierarchy',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return CompanyHierarchyModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Map<String, dynamic>> assignMemberToLead({
+    required String memberId,
+    required String leadId,
+  }) async {
+    final token = await _storage.read(key: AppConstants.accessTokenKey);
+    final response = await _dio.patch(
+      '${AppConstants.baseUrl}/companies/assign-lead',
+      data: {
+        'memberId': memberId,
+        'leadId': leadId,
+      },
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> unassignMemberFromLead(String memberId) async {
+    final token = await _storage.read(key: AppConstants.accessTokenKey);
+    final response = await _dio.patch(
+      '${AppConstants.baseUrl}/companies/unassign-lead/$memberId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return response.data as Map<String, dynamic>;

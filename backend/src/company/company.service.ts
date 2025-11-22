@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { JoinCompanyDto } from './dto/join-company.dto';
@@ -257,6 +257,267 @@ export class CompanyService {
     });
 
     return { message: 'User kicked from company' };
+  }
+
+  // Assign a lead to a member
+  async assignLead(memberId: string, leadId: string, adminId: string) {
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+    });
+
+    if (admin?.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('Only admins can assign leads');
+    }
+
+    const member = await this.prisma.user.findUnique({
+      where: { id: memberId },
+    });
+
+    const lead = await this.prisma.user.findUnique({
+      where: { id: leadId },
+    });
+
+    if (!member || !lead) {
+      throw new NotFoundException('Member or lead not found');
+    }
+
+    if (member.companyId !== admin.companyId || lead.companyId !== admin.companyId) {
+      throw new BadRequestException('Member and lead must be from your company');
+    }
+
+    if (member.role !== UserRole.MEMBER) {
+      throw new BadRequestException('Can only assign leads to members');
+    }
+
+    if (lead.role !== UserRole.LEAD) {
+      throw new BadRequestException('Selected user is not a lead');
+    }
+
+    await this.prisma.user.update({
+      where: { id: memberId },
+      data: { leadId },
+    });
+
+    return { message: 'Lead assigned successfully' };
+  }
+
+  // Get team members for a lead
+  async getTeamMembers(leadId: string) {
+    const lead = await this.prisma.user.findUnique({
+      where: { id: leadId },
+    });
+
+    if (lead?.role !== UserRole.LEAD) {
+      throw new ForbiddenException('Only leads can view their team');
+    }
+
+    return this.prisma.user.findMany({
+      where: {
+        leadId: leadId,
+        companyApprovalStatus: ApprovalStatus.APPROVED,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  // Get all leads in company (for admin)
+  async getCompanyLeads(companyId: string) {
+    return this.prisma.user.findMany({
+      where: {
+        companyId,
+        role: UserRole.LEAD,
+        companyApprovalStatus: ApprovalStatus.APPROVED,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        _count: {
+          select: {
+            teamMembers: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  // Get company hierarchy structure
+  async getCompanyHierarchy(companyId: string) {
+    const admins = await this.prisma.user.findMany({
+      where: {
+        companyId,
+        role: UserRole.ADMIN,
+        companyApprovalStatus: ApprovalStatus.APPROVED,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    const leads = await this.prisma.user.findMany({
+      where: {
+        companyId,
+        role: UserRole.LEAD,
+        companyApprovalStatus: ApprovalStatus.APPROVED,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        teamMembers: {
+          where: {
+            companyApprovalStatus: ApprovalStatus.APPROVED,
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    const unassignedMembers = await this.prisma.user.findMany({
+      where: {
+        companyId,
+        role: UserRole.MEMBER,
+        leadId: null,
+        companyApprovalStatus: ApprovalStatus.APPROVED,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    // Add member count to leads
+    const leadsWithCount = leads.map(lead => ({
+      ...lead,
+      _count: {
+        teamMembers: lead.teamMembers.length,
+      },
+    }));
+
+    return {
+      admins,
+      leads: leadsWithCount,
+      unassignedMembers,
+    };
+  }
+
+  // Assign member to lead
+  async assignMemberToLead(memberId: string, leadId: string, adminId: string) {
+    // Verify admin has permission
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+    });
+
+    if (!admin || admin.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('Only admins can assign members to leads');
+    }
+
+    // Verify member exists and is a MEMBER
+    const member = await this.prisma.user.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
+
+    if (member.role !== UserRole.MEMBER) {
+      throw new BadRequestException('Only members with MEMBER role can be assigned to leads');
+    }
+
+    // Verify lead exists and is a LEAD
+    const lead = await this.prisma.user.findUnique({
+      where: { id: leadId },
+    });
+
+    if (!lead) {
+      throw new NotFoundException('Lead not found');
+    }
+
+    if (lead.role !== UserRole.LEAD) {
+      throw new BadRequestException('Target user is not a lead');
+    }
+
+    // Verify they're in the same company
+    if (member.companyId !== lead.companyId || member.companyId !== admin.companyId) {
+      throw new BadRequestException('Member and lead must be in the same company');
+    }
+
+    // Assign member to lead
+    await this.prisma.user.update({
+      where: { id: memberId },
+      data: { leadId },
+    });
+
+    return {
+      message: 'Member assigned to lead successfully',
+      member: {
+        id: member.id,
+        name: member.name,
+        leadId,
+      },
+    };
+  }
+
+  // Unassign member from lead
+  async unassignMemberFromLead(memberId: string, adminId: string) {
+    // Verify admin has permission
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+    });
+
+    if (!admin || admin.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('Only admins can unassign members from leads');
+    }
+
+    // Verify member exists
+    const member = await this.prisma.user.findUnique({
+      where: { id: memberId },
+    });
+
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
+
+    // Verify they're in the same company
+    if (member.companyId !== admin.companyId) {
+      throw new BadRequestException('Member must be in the same company');
+    }
+
+    // Unassign member from lead
+    await this.prisma.user.update({
+      where: { id: memberId },
+      data: { leadId: null },
+    });
+
+    return {
+      message: 'Member unassigned from lead successfully',
+      member: {
+        id: member.id,
+        name: member.name,
+        leadId: null,
+      },
+    };
   }
 }
 

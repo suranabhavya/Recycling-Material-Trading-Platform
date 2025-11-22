@@ -17,6 +17,10 @@ import 'package:recycling_platform/features/profile/presentation/screens/persona
 import 'package:recycling_platform/features/profile/presentation/screens/privacy_settings_screen.dart';
 import 'package:recycling_platform/features/profile/presentation/screens/team_management_screen.dart';
 import 'package:recycling_platform/features/profile/presentation/screens/team_member_detail_screen.dart';
+import 'package:recycling_platform/features/profile/presentation/screens/hierarchy_management_screen.dart';
+import 'package:recycling_platform/features/lead/presentation/screens/lead_dashboard_screen.dart';
+import 'package:recycling_platform/features/batch/presentation/screens/create_batch_screen.dart';
+import 'package:recycling_platform/features/batch/presentation/screens/admin_batch_approval_screen.dart';
 
 class AppRouter {
   static const String splash = '/';
@@ -33,6 +37,10 @@ class AppRouter {
   static const String personalSettings = '/personal-settings';
   static const String companySettings = '/company-settings';
   static const String teamManagement = '/team-management';
+  static const String hierarchyManagement = '/hierarchy-management';
+  static const String leadDashboard = '/lead-dashboard';
+  static const String createBatch = '/create-batch';
+  static const String adminBatchApproval = '/admin-batch-approval';
   static const String teamMemberDetail = '/team-member-detail';
   static const String notificationSettings = '/notification-settings';
   static const String privacySettings = '/privacy-settings';
@@ -102,6 +110,22 @@ class AppRouter {
       GoRoute(
         path: teamManagement,
         builder: (context, state) => const TeamManagementScreen(),
+      ),
+      GoRoute(
+        path: hierarchyManagement,
+        builder: (context, state) => const HierarchyManagementScreen(),
+      ),
+      GoRoute(
+        path: leadDashboard,
+        builder: (context, state) => const LeadDashboardScreen(),
+      ),
+      GoRoute(
+        path: createBatch,
+        builder: (context, state) => const CreateBatchScreen(),
+      ),
+      GoRoute(
+        path: adminBatchApproval,
+        builder: (context, state) => const AdminBatchApprovalScreen(),
       ),
       GoRoute(
         path: teamMemberDetail,

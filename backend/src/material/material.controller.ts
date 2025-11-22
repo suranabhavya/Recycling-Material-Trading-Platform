@@ -29,6 +29,17 @@ export class MaterialController {
     return this.materialService.findAll(req.user.id);
   }
 
+  // Lead endpoints - must come before :id route
+  @Get('pending-lead-approval')
+  getPendingLeadApproval(@Request() req: { user: any }) {
+    return this.materialService.getPendingLeadApproval(req.user.id);
+  }
+
+  @Get('approved-for-batching')
+  getApprovedMaterials(@Request() req: { user: any }) {
+    return this.materialService.getApprovedMaterials(req.user.id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req) {
     return this.materialService.findOne(id, req.user.id);
@@ -52,9 +63,19 @@ export class MaterialController {
   updateStatus(
     @Param('id') id: string,
     @Request() req,
-    @Body() body: { status: 'APPROVED' | 'REJECTED' },
+    @Body() body: { status: 'APPROVED_BY_ADMIN' | 'REJECTED_BY_ADMIN' },
   ) {
     return this.materialService.updateStatus(id, req.user.id, body.status);
+  }
+
+  @Patch(':id/lead-approve')
+  leadApproveMaterial(@Param('id') id: string, @Request() req: { user: any }) {
+    return this.materialService.leadApproveMaterial(id, req.user.id);
+  }
+
+  @Patch(':id/lead-reject')
+  leadRejectMaterial(@Param('id') id: string, @Request() req: { user: any }) {
+    return this.materialService.leadRejectMaterial(id, req.user.id);
   }
 }
 
