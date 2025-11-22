@@ -1,19 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:recycling_platform/core/providers/dio_provider.dart';
 import 'package:recycling_platform/features/auth/presentation/providers/auth_provider.dart';
 import 'package:recycling_platform/features/company/data/models/company_model.dart';
 import 'package:recycling_platform/features/company/data/repositories/company_repository.dart';
 
 final companyRepositoryProvider = Provider((ref) {
   final dio = ref.watch(dioProvider);
-  const storage = FlutterSecureStorage();
+  final storage = ref.watch(secureStorageProvider);
   return CompanyRepository(dio, storage);
 });
-
-final dioProvider = Provider((ref) => Dio());
 
 class CompanyState {
   final List<CompanyModel> companies;
@@ -54,7 +52,7 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
     try {
       final companies = await _repository.getAllCompanies();
       state = state.copyWith(companies: companies, isLoading: false);
-    } on DioException catch (e) {
+    } on DioError catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.response?.data['message'] ?? 'Failed to load companies',
@@ -95,7 +93,7 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
         );
         context.go('/home');
       }
-    } on DioException catch (e) {
+    } on DioError catch (e) {
       final errorMessage = e.response?.data['message'] ?? 
                           e.response?.data['error'] ??
                           'Failed to create company';
@@ -127,7 +125,7 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
       if (context.mounted) {
         context.go('/pending-approval');
       }
-    } on DioException catch (e) {
+    } on DioError catch (e) {
       final errorMessage = e.response?.data['message'] ?? 
                           e.response?.data['error'] ??
                           'Failed to join company';

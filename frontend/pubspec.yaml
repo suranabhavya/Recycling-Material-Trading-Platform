@@ -21,6 +21,10 @@ dependencies:
   dio: ^5.4.0
   flutter_secure_storage: ^9.0.0
   
+  # Image Handling
+  image_picker: ^1.0.7
+  http: ^1.2.0
+  
   # UI & Animations
   flutter_animate: ^4.5.0
   google_fonts: ^6.1.0

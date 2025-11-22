@@ -1,20 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:recycling_platform/core/constants/app_constants.dart';
+import 'package:recycling_platform/core/providers/dio_provider.dart';
 import 'package:recycling_platform/features/auth/data/models/user_model.dart';
 import 'package:recycling_platform/features/auth/data/repositories/auth_repository.dart';
-
-final dioProvider = Provider((ref) {
-  final dio = Dio(BaseOptions(
-    baseUrl: AppConstants.baseUrl,
-    connectTimeout: AppConstants.connectionTimeout,
-    receiveTimeout: AppConstants.connectionTimeout,
-  ));
-  return dio;
-});
-
-final secureStorageProvider = Provider((ref) => const FlutterSecureStorage());
 
 final authRepositoryProvider = Provider((ref) {
   return AuthRepository(
@@ -69,7 +57,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       await _repository.register(name: name, email: email, password: password);
       state = AuthState(registrationSuccess: true);
-    } on DioException catch (e) {
+    } on DioError catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.response?.data['message'] ?? 'Registration failed',
@@ -84,7 +72,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final response = await _repository.verifyOtp(email, otp);
       state = AuthState(user: response.user, isLoading: false);
-    } on DioException catch (e) {
+    } on DioError catch (e) {
       final errorMessage = e.response?.data['message'] ?? 
                           e.response?.data['error'] ??
                           e.message ?? 
@@ -114,7 +102,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final response = await _repository.login(email, password);
       state = AuthState(user: response.user, isLoading: false);
-    } on DioException catch (e) {
+    } on DioError catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.response?.data['message'] ?? 'Login failed',
@@ -129,7 +117,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       await _repository.forgotPassword(email);
       state = AuthState(otpSent: true);
-    } on DioException catch (e) {
+    } on DioError catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.response?.data['message'] ?? 'Failed to send OTP',
@@ -144,7 +132,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       await _repository.resetPassword(email, otp, password);
       state = AuthState(passwordReset: true);
-    } on DioException catch (e) {
+    } on DioError catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.response?.data['message'] ?? 'Password reset failed',

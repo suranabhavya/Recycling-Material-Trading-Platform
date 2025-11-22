@@ -71,6 +71,7 @@ model Material {
   quantity    Float
   unit        String
   price       Float?
+  images      String[]       @default([])
   status      MaterialStatus @default(PENDING)
   userId      String         @map("user_id")
   user        User           @relation(fields: [userId], references: [id])
