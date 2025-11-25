@@ -1,6 +1,6 @@
 # Gravita Recycling Platform
 
-Modern B2B waste material trading platform with beautiful UI/UX and email OTP verification.
+Modern Business to Business waste material trading platform with beautiful UI/UX and email OTP verification.
 
 ## Tech Stack
 
