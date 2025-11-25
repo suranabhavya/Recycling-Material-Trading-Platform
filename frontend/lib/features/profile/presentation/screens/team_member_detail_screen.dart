@@ -209,7 +209,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
     final currentUser = ref.watch(authProvider).user;
     final isCurrentUser = currentUser?.id == memberId;
     final isMemberAdmin = memberRole.toUpperCase() == 'ADMIN';
-    final currentUserIsAdmin = currentUser?.role?.toUpperCase() == 'ADMIN';
+    final currentUserIsAdmin = currentUser?.roleTemplate?.name.toUpperCase() == 'ADMIN';
 
     // Redirect if not admin
     if (!currentUserIsAdmin) {

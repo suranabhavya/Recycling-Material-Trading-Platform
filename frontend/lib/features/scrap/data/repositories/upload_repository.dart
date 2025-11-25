@@ -37,7 +37,7 @@ class UploadRepository {
         throw Exception('Upload failed with status ${response.statusCode}: ${response.data}');
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         if (e.response != null) {
           throw Exception('Server error: ${e.response?.statusCode} - ${e.response?.data}');
         } else {

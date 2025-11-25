@@ -1,8 +1,3 @@
-enum UserRole {
-  admin,
-  member,
-}
-
 enum CompanyType {
   automobile,
   recycling,
@@ -10,7 +5,18 @@ enum CompanyType {
   others,
 }
 
+enum HierarchyMode {
+  simple,
+  advanced,
+}
+
 enum MaterialStatus {
+  pending,
+  approved,
+  rejected,
+}
+
+enum ApprovalStatus {
   pending,
   approved,
   rejected,

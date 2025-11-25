@@ -9,6 +9,7 @@ import 'package:recycling_platform/core/utils/color_extensions.dart';
 import 'package:recycling_platform/features/scrap/data/models/material_model.dart';
 import 'package:recycling_platform/features/scrap/presentation/providers/material_provider.dart';
 import 'package:recycling_platform/features/scrap/presentation/providers/upload_provider.dart';
+import 'package:recycling_platform/features/auth/presentation/providers/auth_provider.dart';
 
 class AddScrapScreen extends ConsumerStatefulWidget {
   const AddScrapScreen({super.key});
@@ -236,6 +237,9 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(authProvider).user;
+    final requiresApproval = user?.roleTemplate?.requiresApproval ?? false;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -249,9 +253,9 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
               color: Colors.white,
             ),
           ).animate().fadeIn(duration: 600.ms),
-          
+
           const SizedBox(height: 8),
-          
+
           Text(
             'List your recyclable materials',
             style: GoogleFonts.poppins(
@@ -259,6 +263,41 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
               color: Colors.white.withOpacityValue(0.8),
             ),
           ).animate().fadeIn(duration: 600.ms, delay: 100.ms),
+
+          // Approval Notice
+          if (requiresApproval) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.warning.withOpacityValue(0.2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.warning.withOpacityValue(0.5),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppColors.warning,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'This material will require approval from higher levels before being added to inventory.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.white.withOpacityValue(0.9),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(duration: 600.ms, delay: 150.ms),
+          ],
           
           const SizedBox(height: 30),
           
@@ -537,7 +576,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
                                 ),
                               )
                             : Text(
-                                'Submit for Approval',
+                                requiresApproval ? 'Submit for Approval' : 'Submit Material',
                                 style: GoogleFonts.poppins(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,

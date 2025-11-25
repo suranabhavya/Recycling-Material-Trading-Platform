@@ -1,12 +1,17 @@
+import '../../../hierarchy/data/models/approval_chain_model.dart';
+import '../../../hierarchy/data/models/role_template_model.dart';
+
 class UserInfo {
   final String id;
   final String name;
   final String email;
+  final RoleTemplateModel? roleTemplate;
 
   UserInfo({
     required this.id,
     required this.name,
     required this.email,
+    this.roleTemplate,
   });
 
   factory UserInfo.fromJson(Map<String, dynamic> json) {
@@ -14,6 +19,9 @@ class UserInfo {
       id: json['id'] as String,
       name: json['name'] as String,
       email: json['email'] as String,
+      roleTemplate: json['roleTemplate'] != null
+          ? RoleTemplateModel.fromJson(json['roleTemplate'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -22,6 +30,7 @@ class UserInfo {
       'id': id,
       'name': name,
       'email': email,
+      if (roleTemplate != null) 'roleTemplate': roleTemplate!.toJson(),
     };
   }
 }
@@ -35,14 +44,17 @@ class MaterialModel {
   final double? price;
   final List<String> images;
   final String? status;
-  final String? userId;
+  final String? creatorId;
   final String? companyId;
-  final String? leadId;
-  final DateTime? leadApprovedAt;
-  final String? batchId;
+  final int? currentApprovalLevel;
+  final List<ApprovalChainEntry>? approvalChain;
+  final String? lastApproverId;
+  final DateTime? lastApprovedAt;
+  final String? rejectionReason;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final UserInfo? user;
+  final UserInfo? creator;
+  final UserInfo? lastApprover;
 
   MaterialModel({
     this.id,
@@ -53,14 +65,17 @@ class MaterialModel {
     this.price,
     this.images = const [],
     this.status,
-    this.userId,
+    this.creatorId,
     this.companyId,
-    this.leadId,
-    this.leadApprovedAt,
-    this.batchId,
+    this.currentApprovalLevel,
+    this.approvalChain,
+    this.lastApproverId,
+    this.lastApprovedAt,
+    this.rejectionReason,
     this.createdAt,
     this.updatedAt,
-    this.user,
+    this.creator,
+    this.lastApprover,
   });
 
   factory MaterialModel.fromJson(Map<String, dynamic> json) {
@@ -75,21 +90,30 @@ class MaterialModel {
           ? List<String>.from(json['images'] as List)
           : [],
       status: json['status'] as String?,
-      userId: json['userId'] as String?,
+      creatorId: json['creatorId'] as String?,
       companyId: json['companyId'] as String?,
-      leadId: json['leadId'] as String?,
-      leadApprovedAt: json['leadApprovedAt'] != null
-          ? DateTime.parse(json['leadApprovedAt'] as String)
+      currentApprovalLevel: json['currentApprovalLevel'] as int?,
+      approvalChain: json['approvalChain'] != null
+          ? (json['approvalChain'] as List)
+              .map((e) => ApprovalChainEntry.fromJson(e as Map<String, dynamic>))
+              .toList()
           : null,
-      batchId: json['batchId'] as String?,
+      lastApproverId: json['lastApproverId'] as String?,
+      lastApprovedAt: json['lastApprovedAt'] != null
+          ? DateTime.parse(json['lastApprovedAt'] as String)
+          : null,
+      rejectionReason: json['rejectionReason'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
           : null,
-      user: json['user'] != null
-          ? UserInfo.fromJson(json['user'] as Map<String, dynamic>)
+      creator: json['creator'] != null
+          ? UserInfo.fromJson(json['creator'] as Map<String, dynamic>)
+          : null,
+      lastApprover: json['lastApprover'] != null
+          ? UserInfo.fromJson(json['lastApprover'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -104,14 +128,17 @@ class MaterialModel {
       if (price != null) 'price': price,
       'images': images,
       if (status != null) 'status': status,
-      if (userId != null) 'userId': userId,
+      if (creatorId != null) 'creatorId': creatorId,
       if (companyId != null) 'companyId': companyId,
-      if (leadId != null) 'leadId': leadId,
-      if (leadApprovedAt != null) 'leadApprovedAt': leadApprovedAt!.toIso8601String(),
-      if (batchId != null) 'batchId': batchId,
+      if (currentApprovalLevel != null) 'currentApprovalLevel': currentApprovalLevel,
+      if (approvalChain != null) 'approvalChain': approvalChain!.map((e) => e.toJson()).toList(),
+      if (lastApproverId != null) 'lastApproverId': lastApproverId,
+      if (lastApprovedAt != null) 'lastApprovedAt': lastApprovedAt!.toIso8601String(),
+      if (rejectionReason != null) 'rejectionReason': rejectionReason,
       if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
       if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
-      if (user != null) 'user': user!.toJson(),
+      if (creator != null) 'creator': creator!.toJson(),
+      if (lastApprover != null) 'lastApprover': lastApprover!.toJson(),
     };
   }
 
@@ -124,14 +151,17 @@ class MaterialModel {
     double? price,
     List<String>? images,
     String? status,
-    String? userId,
+    String? creatorId,
     String? companyId,
-    String? leadId,
-    DateTime? leadApprovedAt,
-    String? batchId,
+    int? currentApprovalLevel,
+    List<ApprovalChainEntry>? approvalChain,
+    String? lastApproverId,
+    DateTime? lastApprovedAt,
+    String? rejectionReason,
     DateTime? createdAt,
     DateTime? updatedAt,
-    UserInfo? user,
+    UserInfo? creator,
+    UserInfo? lastApprover,
   }) {
     return MaterialModel(
       id: id ?? this.id,
@@ -142,42 +172,47 @@ class MaterialModel {
       price: price ?? this.price,
       images: images ?? this.images,
       status: status ?? this.status,
-      userId: userId ?? this.userId,
+      creatorId: creatorId ?? this.creatorId,
       companyId: companyId ?? this.companyId,
-      leadId: leadId ?? this.leadId,
-      leadApprovedAt: leadApprovedAt ?? this.leadApprovedAt,
-      batchId: batchId ?? this.batchId,
+      currentApprovalLevel: currentApprovalLevel ?? this.currentApprovalLevel,
+      approvalChain: approvalChain ?? this.approvalChain,
+      lastApproverId: lastApproverId ?? this.lastApproverId,
+      lastApprovedAt: lastApprovedAt ?? this.lastApprovedAt,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      user: user ?? this.user,
+      creator: creator ?? this.creator,
+      lastApprover: lastApprover ?? this.lastApprover,
     );
   }
 
   // Helper methods for status checking
-  bool get isPendingLeadApproval => status == 'PENDING_LEAD_APPROVAL';
-  bool get isApprovedByLead => status == 'APPROVED_BY_LEAD';
-  bool get isRejectedByLead => status == 'REJECTED_BY_LEAD';
-  bool get isPendingAdminApproval => status == 'PENDING_ADMIN_APPROVAL';
-  bool get isApprovedByAdmin => status == 'APPROVED_BY_ADMIN';
-  bool get isRejectedByAdmin => status == 'REJECTED_BY_ADMIN';
+  bool get isPending => status == 'PENDING';
+  bool get isApproved => status == 'APPROVED';
+  bool get isRejected => status == 'REJECTED';
+  bool get requiresApproval => currentApprovalLevel != null;
 
   String get statusDisplayName {
     switch (status) {
-      case 'PENDING_LEAD_APPROVAL':
-        return 'Pending Lead Approval';
-      case 'APPROVED_BY_LEAD':
-        return 'Approved by Lead';
-      case 'REJECTED_BY_LEAD':
-        return 'Rejected by Lead';
-      case 'PENDING_ADMIN_APPROVAL':
-        return 'Pending Admin Approval';
-      case 'APPROVED_BY_ADMIN':
-        return 'Approved by Admin';
-      case 'REJECTED_BY_ADMIN':
-        return 'Rejected by Admin';
+      case 'PENDING':
+        return 'Pending Approval';
+      case 'APPROVED':
+        return 'Approved';
+      case 'REJECTED':
+        return 'Rejected';
       default:
         return 'Unknown';
     }
+  }
+
+  String? get currentApprovalLevelName {
+    if (currentApprovalLevel == null) return null;
+    return 'Level $currentApprovalLevel';
+  }
+
+  int get approvalProgress {
+    if (approvalChain == null || approvalChain!.isEmpty) return 0;
+    return approvalChain!.where((e) => e.isApproved).length;
   }
 }
 

@@ -2,7 +2,7 @@ import { Injectable, ConflictException, NotFoundException, BadRequestException, 
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { JoinCompanyDto } from './dto/join-company.dto';
-import { ApprovalStatus, UserRole } from '@prisma/client';
+import { ApprovalStatus } from '@prisma/client';
 
 @Injectable()
 export class CompanyService {
@@ -17,17 +17,35 @@ export class CompanyService {
       throw new ConflictException('Company with this email already exists');
     }
 
+    const { roleTemplates, orgUnits, ...companyData } = createCompanyDto;
+
     const company = await this.prisma.company.create({
-      data: createCompanyDto,
+      data: {
+        ...companyData,
+        roleTemplates: {
+          create: roleTemplates,
+        },
+        orgUnits: orgUnits ? {
+          create: orgUnits,
+        } : undefined,
+      },
+      include: {
+        roleTemplates: true,
+      },
     });
 
-    // Assign user as ADMIN of the company they created
+    const adminRole = company.roleTemplates.find(r => r.level === 1);
+
+    if (!adminRole) {
+      throw new BadRequestException('Level 1 (Admin) role template is required');
+    }
+
     await this.prisma.user.update({
       where: { id: userId },
       data: {
         companyId: company.id,
-        role: UserRole.ADMIN,
-        companyApprovalStatus: ApprovalStatus.APPROVED, // Auto-approve for company creator
+        roleTemplateId: adminRole.id,
+        companyApprovalStatus: ApprovalStatus.APPROVED,
       },
     });
 
@@ -43,6 +61,7 @@ export class CompanyService {
         email: true,
         phone: true,
         address: true,
+        hierarchyMode: true,
       },
       orderBy: {
         name: 'asc',
@@ -54,12 +73,21 @@ export class CompanyService {
     const company = await this.prisma.company.findUnique({
       where: { id },
       include: {
+        roleTemplates: {
+          orderBy: { level: 'asc' },
+        },
         users: {
           select: {
             id: true,
             name: true,
             email: true,
-            role: true,
+            roleTemplate: {
+              select: {
+                id: true,
+                name: true,
+                level: true,
+              },
+            },
             companyApprovalStatus: true,
           },
         },
@@ -76,6 +104,12 @@ export class CompanyService {
   async joinCompany(joinCompanyDto: JoinCompanyDto, userId: string) {
     const company = await this.prisma.company.findUnique({
       where: { id: joinCompanyDto.companyId },
+      include: {
+        roleTemplates: {
+          orderBy: { level: 'desc' },
+          take: 1,
+        },
+      },
     });
 
     if (!company) {
@@ -90,12 +124,17 @@ export class CompanyService {
       throw new BadRequestException('You are already part of a company');
     }
 
-    // Join company with PENDING status (needs admin approval)
+    const lowestRole = company.roleTemplates[0];
+
+    if (!lowestRole) {
+      throw new BadRequestException('Company has no role templates defined');
+    }
+
     await this.prisma.user.update({
       where: { id: userId },
       data: {
         companyId: company.id,
-        role: UserRole.MEMBER,
+        roleTemplateId: lowestRole.id,
         companyApprovalStatus: ApprovalStatus.PENDING,
       },
     });
@@ -116,6 +155,12 @@ export class CompanyService {
         id: true,
         name: true,
         email: true,
+        roleTemplate: {
+          select: {
+            name: true,
+            level: true,
+          },
+        },
         createdAt: true,
       },
     });
@@ -124,9 +169,10 @@ export class CompanyService {
   async approveUser(userId: string, adminId: string) {
     const admin = await this.prisma.user.findUnique({
       where: { id: adminId },
+      include: { roleTemplate: true },
     });
 
-    if (admin?.role !== UserRole.ADMIN) {
+    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
       throw new BadRequestException('Only admins can approve users');
     }
 
@@ -151,9 +197,10 @@ export class CompanyService {
   async rejectUser(userId: string, adminId: string) {
     const admin = await this.prisma.user.findUnique({
       where: { id: adminId },
+      include: { roleTemplate: true },
     });
 
-    if (admin?.role !== UserRole.ADMIN) {
+    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
       throw new BadRequestException('Only admins can reject users');
     }
 
@@ -185,7 +232,25 @@ export class CompanyService {
         id: true,
         name: true,
         email: true,
-        role: true,
+        roleTemplate: {
+          select: {
+            id: true,
+            name: true,
+            level: true,
+          },
+        },
+        manager: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        orgUnit: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         createdAt: true,
       },
       orderBy: {
@@ -194,58 +259,137 @@ export class CompanyService {
     });
   }
 
-  async updateUserRole(userId: string, newRole: UserRole, adminId: string) {
+  async updateUserRole(userId: string, roleTemplateId: string, adminId: string) {
     const admin = await this.prisma.user.findUnique({
       where: { id: adminId },
+      include: { roleTemplate: true },
     });
 
-    if (admin?.role !== UserRole.ADMIN) {
+    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
       throw new BadRequestException('Only admins can update user roles');
     }
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      include: { roleTemplate: true },
     });
 
     if (!user || user.companyId !== admin.companyId) {
       throw new BadRequestException('User not from your company');
     }
 
-    if (user.role === UserRole.ADMIN) {
+    if (user.roleTemplate?.level === 1 && userId !== adminId) {
       throw new BadRequestException('Cannot change the role of another admin');
     }
 
-    // Validate role transitions
-    if (newRole === UserRole.ADMIN || newRole === UserRole.LEAD || newRole === UserRole.MEMBER) {
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: { role: newRole },
-      });
-    } else {
-      throw new BadRequestException('Invalid role');
-    }
-
-    return { message: `User role updated to ${newRole}` };
-  }
-
-  async kickMember(userId: string, adminId: string) {
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
+    const newRole = await this.prisma.roleTemplate.findUnique({
+      where: { id: roleTemplateId },
     });
 
-    if (admin?.role !== UserRole.ADMIN) {
-      throw new BadRequestException('Only admins can kick members');
+    if (!newRole || newRole.companyId !== admin.companyId) {
+      throw new BadRequestException('Invalid role template');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { roleTemplateId },
+    });
+
+    return { message: `User role updated to ${newRole.name}` };
+  }
+
+  async assignManager(userId: string, managerId: string, adminId: string) {
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+      include: { roleTemplate: true },
+    });
+
+    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
+      throw new ForbiddenException('Only admins can assign managers');
     }
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
 
+    const manager = await this.prisma.user.findUnique({
+      where: { id: managerId },
+      include: { roleTemplate: true },
+    });
+
+    if (!user || !manager) {
+      throw new NotFoundException('User or manager not found');
+    }
+
+    if (user.companyId !== admin.companyId || manager.companyId !== admin.companyId) {
+      throw new BadRequestException('Users must be from your company');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { managerId },
+    });
+
+    return { message: 'Manager assigned successfully' };
+  }
+
+  async assignOrgUnit(userId: string, orgUnitId: string, adminId: string, isOrgUnitHead: boolean = false) {
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+      include: { roleTemplate: true },
+    });
+
+    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
+      throw new ForbiddenException('Only admins can assign organizational units');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    const orgUnit = await this.prisma.organizationalUnit.findUnique({
+      where: { id: orgUnitId },
+    });
+
+    if (!user || !orgUnit) {
+      throw new NotFoundException('User or organizational unit not found');
+    }
+
+    if (user.companyId !== admin.companyId || orgUnit.companyId !== admin.companyId) {
+      throw new BadRequestException('User and org unit must be from your company');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        orgUnitId,
+        isOrgUnitHead,
+      },
+    });
+
+    return { message: 'Organizational unit assigned successfully' };
+  }
+
+  async kickMember(userId: string, adminId: string) {
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+      include: { roleTemplate: true },
+    });
+
+    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
+      throw new BadRequestException('Only admins can kick members');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { roleTemplate: true },
+    });
+
     if (!user || user.companyId !== admin.companyId) {
       throw new BadRequestException('User not from your company');
     }
 
-    if (user.role === UserRole.ADMIN) {
+    if (user.roleTemplate?.level === 1) {
       throw new BadRequestException('Cannot kick another admin');
     }
 
@@ -259,68 +403,35 @@ export class CompanyService {
     return { message: 'User kicked from company' };
   }
 
-  // Assign a lead to a member
-  async assignLead(memberId: string, leadId: string, adminId: string) {
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
+  async getSubordinates(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        company: true,
+        roleTemplate: true,
+      },
     });
 
-    if (admin?.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admins can assign leads');
-    }
-
-    const member = await this.prisma.user.findUnique({
-      where: { id: memberId },
-    });
-
-    const lead = await this.prisma.user.findUnique({
-      where: { id: leadId },
-    });
-
-    if (!member || !lead) {
-      throw new NotFoundException('Member or lead not found');
-    }
-
-    if (member.companyId !== admin.companyId || lead.companyId !== admin.companyId) {
-      throw new BadRequestException('Member and lead must be from your company');
-    }
-
-    if (member.role !== UserRole.MEMBER) {
-      throw new BadRequestException('Can only assign leads to members');
-    }
-
-    if (lead.role !== UserRole.LEAD) {
-      throw new BadRequestException('Selected user is not a lead');
-    }
-
-    await this.prisma.user.update({
-      where: { id: memberId },
-      data: { leadId },
-    });
-
-    return { message: 'Lead assigned successfully' };
-  }
-
-  // Get team members for a lead
-  async getTeamMembers(leadId: string) {
-    const lead = await this.prisma.user.findUnique({
-      where: { id: leadId },
-    });
-
-    if (lead?.role !== UserRole.LEAD) {
-      throw new ForbiddenException('Only leads can view their team');
+    if (!user || !user.roleTemplate) {
+      throw new NotFoundException('User not found');
     }
 
     return this.prisma.user.findMany({
       where: {
-        leadId: leadId,
+        companyId: user.companyId,
+        managerId: userId,
         companyApprovalStatus: ApprovalStatus.APPROVED,
       },
       select: {
         id: true,
         name: true,
         email: true,
-        role: true,
+        roleTemplate: {
+          select: {
+            name: true,
+            level: true,
+          },
+        },
         createdAt: true,
       },
       orderBy: {
@@ -329,195 +440,114 @@ export class CompanyService {
     });
   }
 
-  // Get all leads in company (for admin)
-  async getCompanyLeads(companyId: string) {
-    return this.prisma.user.findMany({
+  async getCompanyHierarchy(companyId: string) {
+    const users = await this.prisma.user.findMany({
       where: {
         companyId,
-        role: UserRole.LEAD,
         companyApprovalStatus: ApprovalStatus.APPROVED,
       },
       select: {
         id: true,
         name: true,
         email: true,
-        _count: {
+        managerId: true,
+        createdAt: true,
+        roleTemplate: {
           select: {
-            teamMembers: true,
+            id: true,
+            name: true,
+            level: true,
           },
         },
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    });
-  }
-
-  // Get company hierarchy structure
-  async getCompanyHierarchy(companyId: string) {
-    const admins = await this.prisma.user.findMany({
-      where: {
-        companyId,
-        role: UserRole.ADMIN,
-        companyApprovalStatus: ApprovalStatus.APPROVED,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
-    });
-
-    const leads = await this.prisma.user.findMany({
-      where: {
-        companyId,
-        role: UserRole.LEAD,
-        companyApprovalStatus: ApprovalStatus.APPROVED,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        teamMembers: {
-          where: {
-            companyApprovalStatus: ApprovalStatus.APPROVED,
+        orgUnit: {
+          select: {
+            id: true,
+            name: true,
           },
+        },
+        isOrgUnitHead: true,
+        subordinates: {
           select: {
             id: true,
             name: true,
             email: true,
-            role: true,
+            roleTemplate: {
+              select: {
+                name: true,
+              },
+            },
+            createdAt: true,
           },
+        },
+      },
+      orderBy: {
+        roleTemplate: {
+          level: 'asc',
         },
       },
     });
 
-    const unassignedMembers = await this.prisma.user.findMany({
-      where: {
-        companyId,
-        role: UserRole.MEMBER,
-        leadId: null,
-        companyApprovalStatus: ApprovalStatus.APPROVED,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
-    });
+    // Transform the data into the expected structure
+    const admins = users
+      .filter((user) => user.roleTemplate?.level === 1)
+      .map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      }));
 
-    // Add member count to leads
-    const leadsWithCount = leads.map(lead => ({
-      ...lead,
-      _count: {
-        teamMembers: lead.teamMembers.length,
-      },
-    }));
+    // Leads are users with level 2 or users who have subordinates (managers)
+    const leads = users
+      .filter((user) => {
+        const level = user.roleTemplate?.level;
+        // Level 2 or users who have subordinates (are managers)
+        return (level === 2 || (level && level > 1 && user.subordinates.length > 0));
+      })
+      .map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        _count: {
+          teamMembers: user.subordinates.length,
+        },
+        teamMembers: user.subordinates.map((sub) => ({
+          id: sub.id,
+          name: sub.name,
+          email: sub.email,
+          role: sub.roleTemplate?.name,
+          createdAt: sub.createdAt,
+        })),
+      }));
+
+    // Get all user IDs that are admins or leads
+    const adminAndLeadIds = new Set([
+      ...admins.map((a) => a.id),
+      ...leads.map((l) => l.id),
+    ]);
+
+    // Get all user IDs that are assigned to leads (subordinates)
+    const assignedMemberIds = new Set(
+      leads.flatMap((lead) => lead.teamMembers.map((m) => m.id)),
+    );
+
+    // Unassigned members are users who are not admins, not leads, and not assigned to any lead
+    const unassignedMembers = users
+      .filter(
+        (user) =>
+          !adminAndLeadIds.has(user.id) && !assignedMemberIds.has(user.id),
+      )
+      .map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.roleTemplate?.name,
+        createdAt: user.createdAt,
+      }));
 
     return {
       admins,
-      leads: leadsWithCount,
+      leads,
       unassignedMembers,
     };
   }
-
-  // Assign member to lead
-  async assignMemberToLead(memberId: string, leadId: string, adminId: string) {
-    // Verify admin has permission
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
-    });
-
-    if (!admin || admin.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admins can assign members to leads');
-    }
-
-    // Verify member exists and is a MEMBER
-    const member = await this.prisma.user.findUnique({
-      where: { id: memberId },
-    });
-
-    if (!member) {
-      throw new NotFoundException('Member not found');
-    }
-
-    if (member.role !== UserRole.MEMBER) {
-      throw new BadRequestException('Only members with MEMBER role can be assigned to leads');
-    }
-
-    // Verify lead exists and is a LEAD
-    const lead = await this.prisma.user.findUnique({
-      where: { id: leadId },
-    });
-
-    if (!lead) {
-      throw new NotFoundException('Lead not found');
-    }
-
-    if (lead.role !== UserRole.LEAD) {
-      throw new BadRequestException('Target user is not a lead');
-    }
-
-    // Verify they're in the same company
-    if (member.companyId !== lead.companyId || member.companyId !== admin.companyId) {
-      throw new BadRequestException('Member and lead must be in the same company');
-    }
-
-    // Assign member to lead
-    await this.prisma.user.update({
-      where: { id: memberId },
-      data: { leadId },
-    });
-
-    return {
-      message: 'Member assigned to lead successfully',
-      member: {
-        id: member.id,
-        name: member.name,
-        leadId,
-      },
-    };
-  }
-
-  // Unassign member from lead
-  async unassignMemberFromLead(memberId: string, adminId: string) {
-    // Verify admin has permission
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
-    });
-
-    if (!admin || admin.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admins can unassign members from leads');
-    }
-
-    // Verify member exists
-    const member = await this.prisma.user.findUnique({
-      where: { id: memberId },
-    });
-
-    if (!member) {
-      throw new NotFoundException('Member not found');
-    }
-
-    // Verify they're in the same company
-    if (member.companyId !== admin.companyId) {
-      throw new BadRequestException('Member must be in the same company');
-    }
-
-    // Unassign member from lead
-    await this.prisma.user.update({
-      where: { id: memberId },
-      data: { leadId: null },
-    });
-
-    return {
-      message: 'Member unassigned from lead successfully',
-      member: {
-        id: member.id,
-        name: member.name,
-        leadId: null,
-      },
-    };
-  }
 }
-

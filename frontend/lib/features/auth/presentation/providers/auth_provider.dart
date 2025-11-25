@@ -57,7 +57,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       await _repository.register(name: name, email: email, password: password);
       state = AuthState(registrationSuccess: true);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.response?.data['message'] ?? 'Registration failed',
@@ -72,7 +72,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final response = await _repository.verifyOtp(email, otp);
       state = AuthState(user: response.user, isLoading: false);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       final errorMessage = e.response?.data['message'] ?? 
                           e.response?.data['error'] ??
                           e.message ?? 
@@ -102,7 +102,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final response = await _repository.login(email, password);
       state = AuthState(user: response.user, isLoading: false);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.response?.data['message'] ?? 'Login failed',
@@ -117,7 +117,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       await _repository.forgotPassword(email);
       state = AuthState(otpSent: true);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.response?.data['message'] ?? 'Failed to send OTP',
@@ -132,7 +132,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       await _repository.resetPassword(email, otp, password);
       state = AuthState(passwordReset: true);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.response?.data['message'] ?? 'Password reset failed',

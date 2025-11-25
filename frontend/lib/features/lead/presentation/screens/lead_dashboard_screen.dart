@@ -63,7 +63,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider).user;
-    final isLead = user?.role?.toUpperCase() == 'LEAD';
+    final isLead = user?.roleTemplate?.name.toUpperCase() == 'LEAD';
 
     // Redirect if not lead
     if (!isLead) {
@@ -118,6 +118,16 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                           ),
                         ],
                       ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.inventory_2, color: Colors.white),
+                      onPressed: () async {
+                        final result = await context.push('/my-batches');
+                        if (result == true) {
+                          _loadData();
+                        }
+                      },
+                      tooltip: 'My Batches',
                     ),
                     IconButton(
                       icon: const Icon(Icons.add_box, color: Colors.white),
@@ -467,9 +477,9 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                         ),
                       ),
                       const SizedBox(height: 4),
-                      if (material.user != null)
+                      if (material.creator != null)
                         Text(
-                          'By ${material.user!.name}',
+                          'By ${material.creator!.name}',
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             color: Colors.white.withOpacityValue(0.7),
@@ -623,9 +633,9 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                         ),
                       ),
                       const SizedBox(height: 8),
-                      if (material.user != null)
+                      if (material.creator != null)
                         Text(
-                          'Submitted by ${material.user!.name}',
+                          'Submitted by ${material.creator!.name}',
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             color: Colors.white.withOpacityValue(0.7),
@@ -787,9 +797,57 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
   Future<void> _rejectMaterial(MaterialModel material) async {
     if (!mounted) return;
 
+    // Prompt for rejection reason
+    final reasonController = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Reject Material',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        ),
+        content: TextField(
+          controller: reasonController,
+          decoration: const InputDecoration(
+            labelText: 'Reason for rejection',
+            hintText: 'Enter reason...',
+          ),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Cancel', style: GoogleFonts.poppins()),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final reasonText = reasonController.text.trim();
+              if (reasonText.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please provide a reason'),
+                    backgroundColor: AppColors.warning,
+                  ),
+                );
+                return;
+              }
+              Navigator.of(context).pop(reasonText);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Reject', style: GoogleFonts.poppins()),
+          ),
+        ],
+      ),
+    );
+
+    if (reason == null || !mounted) return;
+
     try {
       final repository = ref.read(materialRepositoryProvider);
-      await repository.leadRejectMaterial(material.id!);
+      await repository.leadRejectMaterial(material.id!, reason);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

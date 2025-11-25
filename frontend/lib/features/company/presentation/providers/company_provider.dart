@@ -52,7 +52,7 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
     try {
       final companies = await _repository.getAllCompanies();
       state = state.copyWith(companies: companies, isLoading: false);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.response?.data['message'] ?? 'Failed to load companies',
@@ -72,6 +72,8 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
     String? phone,
     String? address,
     required String type,
+    required String hierarchyMode,
+    required List<dynamic> roleTemplates,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -81,6 +83,8 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
         phone: phone,
         address: address,
         type: type,
+        hierarchyMode: hierarchyMode,
+        roleTemplates: roleTemplates.map((role) => role.toJson() as Map<String, dynamic>).toList(),
       );
       
       // Refresh user data to get updated role and status
@@ -93,7 +97,7 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
         );
         context.go('/home');
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       final errorMessage = e.response?.data['message'] ?? 
                           e.response?.data['error'] ??
                           'Failed to create company';
@@ -125,7 +129,7 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
       if (context.mounted) {
         context.go('/pending-approval');
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       final errorMessage = e.response?.data['message'] ?? 
                           e.response?.data['error'] ??
                           'Failed to join company';

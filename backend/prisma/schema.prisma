@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  ADMIN
-  LEAD
-  MEMBER
-}
-
 enum CompanyType {
   AUTOMOBILE
   RECYCLING
@@ -21,19 +15,9 @@ enum CompanyType {
 }
 
 enum MaterialStatus {
-  PENDING_LEAD_APPROVAL
-  APPROVED_BY_LEAD
-  REJECTED_BY_LEAD
-  PENDING_ADMIN_APPROVAL
-  APPROVED_BY_ADMIN
-  REJECTED_BY_ADMIN
-}
-
-enum BatchStatus {
-  DRAFT
-  SUBMITTED
-  APPROVED
-  REJECTED
+  PENDING           // Waiting for approval at some level
+  APPROVED          // Approved and listed for selling
+  REJECTED          // Rejected at some level
 }
 
 enum ApprovalStatus {
@@ -42,117 +26,156 @@ enum ApprovalStatus {
   REJECTED
 }
 
-model User {
-  id                      String          @id @default(uuid())
-  email                   String          @unique
-  password                String
-  name                    String
-  role                    UserRole?
-  isVerified              Boolean         @default(false) @map("is_verified")
-  companyId               String?         @map("company_id")
-  company                 Company?        @relation(fields: [companyId], references: [id])
-  companyApprovalStatus   ApprovalStatus? @default(PENDING) @map("company_approval_status")
-  
-  // Member → Lead relationship
-  leadId                  String?         @map("lead_id")
-  lead                    User?           @relation("LeadMembers", fields: [leadId], references: [id], onDelete: SetNull)
-  teamMembers             User[]          @relation("LeadMembers")
-  
-  // User's materials
-  materials               Material[]      @relation("UserMaterials")
-  
-  // Materials approved by this lead
-  approvedMaterials       Material[]      @relation("LeadApprovals")
-  
-  // Batches created by this lead
-  createdBatches          MaterialBatch[] @relation("BatchCreator")
-  
-  // Batches reviewed by this admin
-  reviewedBatches         MaterialBatch[] @relation("BatchReviewer")
-  
-  createdAt               DateTime        @default(now()) @map("created_at")
-  updatedAt               DateTime        @updatedAt @map("updated_at")
-
-  @@map("users")
+enum HierarchyMode {
+  SIMPLE    // Just role levels + manager relationships
+  ADVANCED  // Full organizational tree structure
 }
 
+// ============================================
+// COMPANY & HIERARCHY SETUP
+// ============================================
+
 model Company {
-  id             String          @id @default(uuid())
-  name           String
-  email          String          @unique
-  phone          String?
-  address        String?
-  type           CompanyType
-  users          User[]
-  materials      Material[]
-  materialBatches MaterialBatch[]
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
+  id                String                @id @default(uuid())
+  name              String
+  email             String                @unique
+  phone             String?
+  address           String?
+  type              CompanyType
+  hierarchyMode     HierarchyMode         @default(SIMPLE) @map("hierarchy_mode")
+
+  users             User[]
+  roleTemplates     RoleTemplate[]
+  orgUnits          OrganizationalUnit[]
+  materials         Material[]
+
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @updatedAt @map("updated_at")
 
   @@map("companies")
 }
 
+// Role templates define what users CAN DO (permissions)
+model RoleTemplate {
+  id                String   @id @default(uuid())
+  companyId         String   @map("company_id")
+  name              String   // "Admin", "Regional Head", "State Manager", "Sales Member"
+  level             Int      // 1 = top (Admin), higher numbers = lower in hierarchy
+  permissions       Json     // { canInviteUsers: true, canManageUsers: true, canDeleteMaterials: true, ... }
+  requiresApproval  Boolean  @default(false) @map("requires_approval") // Does this role need approval before posting materials?
+  description       String?  // Optional description of the role
+
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  users             User[]
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@unique([companyId, level])
+  @@map("role_templates")
+}
+
+// Organizational units define WHERE users work (structure/geography)
+// Only used when hierarchyMode = ADVANCED
+model OrganizationalUnit {
+  id                String                @id @default(uuid())
+  companyId         String                @map("company_id")
+  name              String                // "APAC Region 1", "North India Division", "Delhi Dealership"
+  parentId          String?               @map("parent_id")
+  metadata          Json?                 // { type: "region", location: "APAC", color: "#FF5733" }
+
+  company           Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  parent            OrganizationalUnit?   @relation("OrgTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children          OrganizationalUnit[]  @relation("OrgTree")
+  users             User[]
+
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @updatedAt @map("updated_at")
+
+  @@map("organizational_units")
+}
+
+// ============================================
+// USERS & AUTHENTICATION
+// ============================================
+
+model User {
+  id                      String                @id @default(uuid())
+  email                   String                @unique
+  password                String
+  name                    String
+  isVerified              Boolean               @default(false) @map("is_verified")
+
+  // Company relationship
+  companyId               String?               @map("company_id")
+  company                 Company?              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyApprovalStatus   ApprovalStatus?       @default(PENDING) @map("company_approval_status")
+
+  // Hybrid hierarchy fields
+  roleTemplateId          String?               @map("role_template_id")
+  roleTemplate            RoleTemplate?         @relation(fields: [roleTemplateId], references: [id], onDelete: SetNull)
+
+  // For SIMPLE mode: direct manager relationship
+  managerId               String?               @map("manager_id")
+  manager                 User?                 @relation("ManagerSubordinates", fields: [managerId], references: [id], onDelete: SetNull)
+  subordinates            User[]                @relation("ManagerSubordinates")
+
+  // For ADVANCED mode: organizational unit
+  orgUnitId               String?               @map("org_unit_id")
+  orgUnit                 OrganizationalUnit?   @relation(fields: [orgUnitId], references: [id], onDelete: SetNull)
+  isOrgUnitHead           Boolean               @default(false) @map("is_org_unit_head") // True if user manages this org unit
+
+  // Materials
+  createdMaterials        Material[]            @relation("CreatedMaterials")
+  approvedMaterials       Material[]            @relation("ApprovedMaterials")
+
+  createdAt               DateTime              @default(now()) @map("created_at")
+  updatedAt               DateTime              @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+// ============================================
+// MATERIALS
+// ============================================
+
 model Material {
-  id              String         @id @default(uuid())
-  name            String
-  description     String?
-  quantity        Float
-  unit            String
-  price           Float?
-  images          String[]       @default([])
-  status          MaterialStatus @default(PENDING_LEAD_APPROVAL)
-  
-  // Creator of the material
-  userId          String         @map("user_id")
-  user            User           @relation("UserMaterials", fields: [userId], references: [id])
-  
+  id                    String         @id @default(uuid())
+  name                  String
+  description           String?
+  quantity              Float
+  unit                  String
+  price                 Float?
+  images                String[]       @default([])
+  status                MaterialStatus @default(PENDING)
+
+  // Approval tracking
+  currentApprovalLevel  Int?           @map("current_approval_level") // Which level needs to approve next (null if approved/rejected)
+  approvalChain         Json           @default("[]") @map("approval_chain") // History: [{ level: 2, userId: "...", approvedAt: "...", action: "approved" }]
+  rejectionReason       String?        @map("rejection_reason")
+
+  // Creator
+  creatorId             String         @map("creator_id")
+  creator               User           @relation("CreatedMaterials", fields: [creatorId], references: [id], onDelete: Cascade)
+
   // Company
-  companyId       String         @map("company_id")
-  company         Company        @relation(fields: [companyId], references: [id])
-  
-  // Lead who approved this material
-  leadId          String?        @map("lead_id")
-  lead            User?          @relation("LeadApprovals", fields: [leadId], references: [id], onDelete: SetNull)
-  leadApprovedAt  DateTime?      @map("lead_approved_at")
-  
-  // Batch this material belongs to
-  batchId         String?        @map("batch_id")
-  batch           MaterialBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
-  
-  createdAt       DateTime       @default(now()) @map("created_at")
-  updatedAt       DateTime       @updatedAt @map("updated_at")
+  companyId             String         @map("company_id")
+  company               Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Last approver (for quick reference)
+  lastApproverId        String?        @map("last_approver_id")
+  lastApprover          User?          @relation("ApprovedMaterials", fields: [lastApproverId], references: [id], onDelete: SetNull)
+  lastApprovedAt        DateTime?      @map("last_approved_at")
+
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
 
   @@map("materials")
 }
 
-model MaterialBatch {
-  id          String      @id @default(uuid())
-  name        String
-  description String?
-  status      BatchStatus @default(DRAFT)
-  
-  // Lead who created the batch
-  leadId      String      @map("lead_id")
-  lead        User        @relation("BatchCreator", fields: [leadId], references: [id])
-  
-  // Company
-  companyId   String      @map("company_id")
-  company     Company     @relation(fields: [companyId], references: [id])
-  
-  // Materials in this batch
-  materials   Material[]
-  
-  // Submission and review tracking
-  submittedAt DateTime?   @map("submitted_at")
-  reviewedAt  DateTime?   @map("reviewed_at")
-  reviewedBy  String?     @map("reviewed_by")
-  reviewer    User?       @relation("BatchReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
-  
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
-
-  @@map("material_batches")
-}
+// ============================================
+// AUTHENTICATION
+// ============================================
 
 model Otp {
   id        String   @id @default(uuid())

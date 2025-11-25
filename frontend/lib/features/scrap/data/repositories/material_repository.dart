@@ -61,21 +61,21 @@ class MaterialRepository {
     }
   }
 
-  // Lead-specific methods
-  Future<List<MaterialModel>> getPendingLeadApproval() async {
+  // Approval methods
+  Future<List<MaterialModel>> getPendingApprovals() async {
     try {
-      final response = await _dio.get('/materials/pending-lead-approval');
+      final response = await _dio.get('/materials/pending-approvals');
 
       final List<dynamic> data = response.data as List;
       return data.map((json) => MaterialModel.fromJson(json)).toList();
     } catch (e) {
-      throw Exception('Failed to fetch pending materials: $e');
+      throw Exception('Failed to fetch pending approvals: $e');
     }
   }
 
-  Future<MaterialModel> leadApproveMaterial(String materialId) async {
+  Future<MaterialModel> approveMaterial(String materialId) async {
     try {
-      final response = await _dio.patch('/materials/$materialId/lead-approve');
+      final response = await _dio.post('/materials/$materialId/approve');
 
       return MaterialModel.fromJson(response.data);
     } catch (e) {
@@ -83,9 +83,12 @@ class MaterialRepository {
     }
   }
 
-  Future<MaterialModel> leadRejectMaterial(String materialId) async {
+  Future<MaterialModel> rejectMaterial(String materialId, String reason) async {
     try {
-      final response = await _dio.patch('/materials/$materialId/lead-reject');
+      final response = await _dio.post(
+        '/materials/$materialId/reject',
+        data: {'reason': reason},
+      );
 
       return MaterialModel.fromJson(response.data);
     } catch (e) {
@@ -93,14 +96,73 @@ class MaterialRepository {
     }
   }
 
-  Future<List<MaterialModel>> getApprovedMaterials() async {
+  Future<List<MaterialModel>> getMyMaterials() async {
     try {
-      final response = await _dio.get('/materials/approved-for-batching');
+      final response = await _dio.get('/materials/my-materials');
 
       final List<dynamic> data = response.data as List;
       return data.map((json) => MaterialModel.fromJson(json)).toList();
     } catch (e) {
+      throw Exception('Failed to fetch my materials: $e');
+    }
+  }
+
+  Future<List<MaterialModel>> getInventory() async {
+    try {
+      final response = await _dio.get('/materials/inventory');
+
+      final List<dynamic> data = response.data as List;
+      return data.map((json) => MaterialModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch inventory: $e');
+    }
+  }
+
+  Future<List<MaterialModel>> getApprovedMaterials() async {
+    try {
+      final response = await _dio.get('/materials/inventory');
+
+      final List<dynamic> data = response.data as List;
+      return data
+          .map((json) => MaterialModel.fromJson(json))
+          .where((material) => material.status == 'APPROVED')
+          .toList();
+    } catch (e) {
       throw Exception('Failed to fetch approved materials: $e');
+    }
+  }
+
+  Future<List<MaterialModel>> getPendingLeadApproval() async {
+    try {
+      final response = await _dio.get('/materials/pending-approvals');
+
+      final List<dynamic> data = response.data as List;
+      return data.map((json) => MaterialModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch pending lead approvals: $e');
+    }
+  }
+
+  Future<MaterialModel> leadApproveMaterial(String materialId) async {
+    try {
+      final response = await _dio.post('/materials/$materialId/approve');
+
+      return MaterialModel.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Failed to approve material: $e');
+    }
+  }
+
+  Future<MaterialModel> leadRejectMaterial(String materialId, String reason) async {
+    try {
+      final response = await _dio.post(
+        '/materials/$materialId/reject',
+        data: {'reason': reason},
+      );
+
+      return MaterialModel.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Failed to reject material: $e');
     }
   }
 }

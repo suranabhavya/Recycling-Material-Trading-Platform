@@ -3,7 +3,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { JoinCompanyDto } from './dto/join-company.dto';
-import { UserRole } from '@prisma/client';
 
 @Controller('companies')
 export class CompanyController {
@@ -59,10 +58,10 @@ export class CompanyController {
   @UseGuards(AuthGuard('jwt'))
   updateUserRole(
     @Param('userId') userId: string,
-    @Body('role') role: UserRole,
+    @Body('roleTemplateId') roleTemplateId: string,
     @Request() req: { user: any },
   ) {
-    return this.companyService.updateUserRole(userId, role, req.user.id);
+    return this.companyService.updateUserRole(userId, roleTemplateId, req.user.id);
   }
 
   @Post('kick/:userId')
@@ -71,57 +70,36 @@ export class CompanyController {
     return this.companyService.kickMember(userId, req.user.id);
   }
 
-  // Assign a lead to a member
-  @Patch('assign-lead/:memberId')
+  @Patch('assign-manager')
   @UseGuards(AuthGuard('jwt'))
-  assignLead(
-    @Param('memberId') memberId: string,
-    @Body('leadId') leadId: string,
+  assignManager(
+    @Body('userId') userId: string,
+    @Body('managerId') managerId: string,
     @Request() req: { user: any },
   ) {
-    return this.companyService.assignLead(memberId, leadId, req.user.id);
+    return this.companyService.assignManager(userId, managerId, req.user.id);
   }
 
-  // Get team members for a lead
-  @Get('team/my-members')
+  @Patch('assign-org-unit')
   @UseGuards(AuthGuard('jwt'))
-  getMyTeamMembers(@Request() req: { user: any }) {
-    return this.companyService.getTeamMembers(req.user.id);
+  assignOrgUnit(
+    @Body('userId') userId: string,
+    @Body('orgUnitId') orgUnitId: string,
+    @Body('isOrgUnitHead') isOrgUnitHead: boolean,
+    @Request() req: { user: any },
+  ) {
+    return this.companyService.assignOrgUnit(userId, orgUnitId, req.user.id, isOrgUnitHead);
   }
 
-  // Get all leads in company
-  @Get(':id/leads')
+  @Get('subordinates/me')
   @UseGuards(AuthGuard('jwt'))
-  getCompanyLeads(@Param('id') id: string) {
-    return this.companyService.getCompanyLeads(id);
+  getMySubordinates(@Request() req: { user: any }) {
+    return this.companyService.getSubordinates(req.user.id);
   }
 
-  // Get company hierarchy
   @Get(':id/hierarchy')
   @UseGuards(AuthGuard('jwt'))
   getCompanyHierarchy(@Param('id') id: string) {
     return this.companyService.getCompanyHierarchy(id);
   }
-
-  // Assign member to lead
-  @Patch('assign-lead')
-  @UseGuards(AuthGuard('jwt'))
-  assignMemberToLead(
-    @Body('memberId') memberId: string,
-    @Body('leadId') leadId: string,
-    @Request() req: { user: any },
-  ) {
-    return this.companyService.assignMemberToLead(memberId, leadId, req.user.id);
-  }
-
-  // Unassign member from lead
-  @Patch('unassign-lead/:memberId')
-  @UseGuards(AuthGuard('jwt'))
-  unassignMemberFromLead(
-    @Param('memberId') memberId: string,
-    @Request() req: { user: any },
-  ) {
-    return this.companyService.unassignMemberFromLead(memberId, req.user.id);
-  }
 }
-

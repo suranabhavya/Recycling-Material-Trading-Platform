@@ -22,6 +22,9 @@ class CompanyRepository {
     String? phone,
     String? address,
     required String type,
+    required String hierarchyMode,
+    required List<Map<String, dynamic>> roleTemplates,
+    List<Map<String, dynamic>>? orgUnits,
   }) async {
     final token = await _storage.read(key: AppConstants.accessTokenKey);
     final response = await _dio.post(
@@ -32,6 +35,9 @@ class CompanyRepository {
         'phone': phone,
         'address': address,
         'type': type,
+        'hierarchyMode': hierarchyMode,
+        'roleTemplates': roleTemplates,
+        if (orgUnits != null) 'orgUnits': orgUnits,
       },
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );

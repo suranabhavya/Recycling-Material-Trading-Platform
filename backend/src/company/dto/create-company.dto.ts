@@ -1,5 +1,8 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { CompanyType } from '@prisma/client';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CompanyType, HierarchyMode } from '@prisma/client';
+import { CreateRoleTemplateDto } from '../../hierarchy/dto/create-role-template.dto';
+import { CreateOrgUnitDto } from '../../hierarchy/dto/create-org-unit.dto';
 
 export class CreateCompanyDto {
   @IsString()
@@ -19,5 +22,19 @@ export class CreateCompanyDto {
 
   @IsEnum(CompanyType)
   type: CompanyType;
+
+  @IsEnum(HierarchyMode)
+  hierarchyMode: HierarchyMode;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateRoleTemplateDto)
+  roleTemplates: CreateRoleTemplateDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateOrgUnitDto)
+  orgUnits?: CreateOrgUnitDto[];
 }
 

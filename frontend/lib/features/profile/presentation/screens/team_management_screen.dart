@@ -69,8 +69,8 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider).user;
-    final isAdmin = user?.role?.toUpperCase() == 'ADMIN';
-    
+    final isAdmin = user?.roleTemplate?.isAdmin ?? false;
+
     // Redirect if not admin
     if (!isAdmin) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -382,13 +382,17 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                       itemBuilder: (context, index) {
                                         final member = _members[index];
                                         final isCurrentUser = member['id'] == user?.id;
-                                        final isMemberAdmin = member['role']?.toString().toUpperCase() == 'ADMIN';
-                                        
+                                        final roleTemplate = member['roleTemplate'] as Map<String, dynamic>?;
+                                        final level = roleTemplate?['level'] as int?;
+                                        final roleName = roleTemplate?['name'] as String?;
+                                        final isMemberAdmin = level == 1;
+
                                         return _buildMemberCard(
                                           id: member['id'] as String,
                                           name: member['name'] as String,
                                           email: member['email'] as String,
-                                          role: member['role'] as String?,
+                                          level: level,
+                                          roleName: roleName,
                                           createdAt: member['createdAt'] as String?,
                                           isCurrentUser: isCurrentUser,
                                           isMemberAdmin: isMemberAdmin,
@@ -410,26 +414,28 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
     );
   }
 
-  Color _getRoleColor(String? role) {
-    switch (role?.toUpperCase()) {
-      case 'ADMIN':
+  Color _getRoleColor(int? level) {
+    if (level == null) return Colors.grey;
+    switch (level) {
+      case 1:
         return Colors.orange;
-      case 'LEAD':
+      case 2:
         return Colors.purple;
-      case 'MEMBER':
+      case 3:
         return Colors.blue;
       default:
-        return Colors.grey;
+        return Colors.teal;
     }
   }
 
-  IconData _getRoleIcon(String? role) {
-    switch (role?.toUpperCase()) {
-      case 'ADMIN':
+  IconData _getRoleIcon(int? level) {
+    if (level == null) return Icons.person_outline;
+    switch (level) {
+      case 1:
         return Icons.admin_panel_settings;
-      case 'LEAD':
+      case 2:
         return Icons.stars;
-      case 'MEMBER':
+      case 3:
         return Icons.person;
       default:
         return Icons.person_outline;
@@ -452,7 +458,8 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
     required String id,
     required String name,
     required String email,
-    String? role,
+    int? level,
+    String? roleName,
     String? createdAt,
     required bool isCurrentUser,
     required bool isMemberAdmin,
@@ -462,7 +469,8 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
         'id': id,
         'name': name,
         'email': email,
-        'role': role,
+        'level': level,
+        'roleName': roleName,
         'createdAt': createdAt,
       }),
       child: Container(
@@ -491,13 +499,13 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
                   colors: [
-                    _getRoleColor(role).withOpacityValue(0.3),
-                    _getRoleColor(role).withOpacityValue(0.1),
+                    _getRoleColor(level).withOpacityValue(0.3),
+                    _getRoleColor(level).withOpacityValue(0.1),
                   ],
                 ),
               ),
               child: Icon(
-                _getRoleIcon(role),
+                _getRoleIcon(level),
                 color: Colors.white,
                 size: 24,
               ),
@@ -551,11 +559,11 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _getRoleColor(role).withOpacityValue(0.3),
+                      color: _getRoleColor(level).withOpacityValue(0.3),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      role?.toUpperCase() ?? 'MEMBER',
+                      roleName?.toUpperCase() ?? 'NO ROLE',
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,

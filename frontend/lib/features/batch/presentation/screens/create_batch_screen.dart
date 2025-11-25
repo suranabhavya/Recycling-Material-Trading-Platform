@@ -89,9 +89,18 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Batch created successfully!'),
+        SnackBar(
+          content: const Text('Batch created successfully! Submit it from "My Batches" to send for approval.'),
           backgroundColor: AppColors.success,
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'View Batches',
+            textColor: Colors.white,
+            onPressed: () {
+              context.pop(true);
+              context.push('/my-batches');
+            },
+          ),
         ),
       );
       context.pop(true);
@@ -556,10 +565,10 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                       ],
                     ],
                   ),
-                  if (material.user != null) ...[
+                  if (material.creator != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      'By ${material.user!.name}',
+                      'By ${material.creator!.name}',
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         color: Colors.white.withOpacityValue(0.6),

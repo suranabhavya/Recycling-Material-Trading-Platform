@@ -90,7 +90,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   String _getRoleDisplayName(String? role) {
-    switch (role?.toUpperCase()) {
+    if (role == null) return 'MEMBER';
+    
+    final upperRole = role.toUpperCase();
+    switch (upperRole) {
       case 'ADMIN':
         return 'ADMIN';
       case 'LEAD':
@@ -98,7 +101,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       case 'MEMBER':
         return 'MEMBER';
       default:
-        return 'MEMBER';
+        // If role name doesn't match known roles, return the role name as-is (capitalized)
+        return role.isNotEmpty ? role.toUpperCase() : 'MEMBER';
     }
   }
 
@@ -106,8 +110,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
-    final isAdmin = user?.role?.toUpperCase() == 'ADMIN';
-    final userRole = user?.role;
+    final isAdmin = user?.roleTemplate?.isAdmin ?? false;
+    // Use level-based check first, then fallback to name
+    final userRole = isAdmin 
+        ? 'ADMIN' 
+        : (user?.roleTemplate?.name.toUpperCase() ?? 'MEMBER');
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -285,7 +292,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 12),
             
             // Lead Dashboard (Lead Only)
-            if (userRole?.toUpperCase() == 'LEAD') ...[
+            if (userRole.toUpperCase() == 'LEAD') ...[
               _buildSettingsButton(
                 icon: Icons.dashboard_outlined,
                 label: 'Lead Dashboard',

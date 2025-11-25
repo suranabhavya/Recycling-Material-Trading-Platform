@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recycling_platform/core/theme/app_colors.dart';
 import 'package:recycling_platform/core/utils/color_extensions.dart';
@@ -89,6 +90,32 @@ class DashboardScreen extends ConsumerWidget {
           
           const SizedBox(height: 30),
           
+          // Quick Actions (Role-based)
+          if (user?.roleTemplate != null && user!.roleTemplate!.level <= 3) ...[
+            Text(
+              'Quick Actions',
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ).animate().fadeIn(duration: 600.ms, delay: 400.ms),
+
+            const SizedBox(height: 16),
+
+            // Material Approvals for users with approval permissions
+            _buildQuickActionCard(
+              context: context,
+              icon: Icons.approval_outlined,
+              title: 'Material Approvals',
+              subtitle: 'Review pending materials',
+              color: Colors.orange,
+              onTap: () => context.push('/material-approvals'),
+            ).animate().fadeIn(duration: 600.ms, delay: 450.ms).slideX(begin: -0.2, end: 0),
+
+            const SizedBox(height: 30),
+          ],
+          
           // Recent Activity
           Text(
             'Recent Activity',
@@ -97,7 +124,7 @@ class DashboardScreen extends ConsumerWidget {
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
-          ).animate().fadeIn(duration: 600.ms, delay: 400.ms),
+          ).animate().fadeIn(duration: 600.ms, delay: 500.ms),
           
           const SizedBox(height: 16),
           
@@ -146,7 +173,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ).animate().fadeIn(duration: 600.ms, delay: 500.ms).slideY(begin: 0.2, end: 0),
+          ).animate().fadeIn(duration: 600.ms, delay: 600.ms).slideY(begin: 0.2, end: 0),
         ],
       ),
     );
@@ -204,6 +231,79 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionCard({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              color.withOpacityValue(0.3),
+              color.withOpacityValue(0.15),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: color.withOpacityValue(0.4),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: color.withOpacityValue(0.3),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: Colors.white, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.white.withOpacityValue(0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white.withOpacityValue(0.6),
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }

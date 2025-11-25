@@ -18,9 +18,11 @@ import 'package:recycling_platform/features/profile/presentation/screens/privacy
 import 'package:recycling_platform/features/profile/presentation/screens/team_management_screen.dart';
 import 'package:recycling_platform/features/profile/presentation/screens/team_member_detail_screen.dart';
 import 'package:recycling_platform/features/profile/presentation/screens/hierarchy_management_screen.dart';
-import 'package:recycling_platform/features/lead/presentation/screens/lead_dashboard_screen.dart';
+import 'package:recycling_platform/features/material/presentation/screens/material_approval_screen.dart';
 import 'package:recycling_platform/features/batch/presentation/screens/create_batch_screen.dart';
 import 'package:recycling_platform/features/batch/presentation/screens/admin_batch_approval_screen.dart';
+import 'package:recycling_platform/features/batch/presentation/screens/my_batches_screen.dart';
+import 'package:recycling_platform/features/lead/presentation/screens/lead_dashboard_screen.dart';
 
 class AppRouter {
   static const String splash = '/';
@@ -38,13 +40,15 @@ class AppRouter {
   static const String companySettings = '/company-settings';
   static const String teamManagement = '/team-management';
   static const String hierarchyManagement = '/hierarchy-management';
-  static const String leadDashboard = '/lead-dashboard';
+  static const String materialApprovals = '/material-approvals';
   static const String createBatch = '/create-batch';
+  static const String myBatches = '/my-batches';
   static const String adminBatchApproval = '/admin-batch-approval';
   static const String teamMemberDetail = '/team-member-detail';
   static const String notificationSettings = '/notification-settings';
   static const String privacySettings = '/privacy-settings';
   static const String helpSupport = '/help-support';
+  static const String leadDashboard = '/lead-dashboard';
 
   static final GoRouter router = GoRouter(
     initialLocation: splash,
@@ -116,12 +120,16 @@ class AppRouter {
         builder: (context, state) => const HierarchyManagementScreen(),
       ),
       GoRoute(
-        path: leadDashboard,
-        builder: (context, state) => const LeadDashboardScreen(),
+        path: materialApprovals,
+        builder: (context, state) => const MaterialApprovalScreen(),
       ),
       GoRoute(
         path: createBatch,
         builder: (context, state) => const CreateBatchScreen(),
+      ),
+      GoRoute(
+        path: myBatches,
+        builder: (context, state) => const MyBatchesScreen(),
       ),
       GoRoute(
         path: adminBatchApproval,
@@ -151,6 +159,10 @@ class AppRouter {
       GoRoute(
         path: helpSupport,
         builder: (context, state) => const HelpSupportScreen(),
+      ),
+      GoRoute(
+        path: leadDashboard,
+        builder: (context, state) => const LeadDashboardScreen(),
       ),
     ],
   );

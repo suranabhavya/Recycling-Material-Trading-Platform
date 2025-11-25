@@ -63,7 +63,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider).user;
-    final isAdmin = user?.role?.toUpperCase() == 'ADMIN';
+    final isAdmin = user?.roleTemplate?.name.toUpperCase() == 'ADMIN';
     
     // Redirect if not admin
     if (!isAdmin) {

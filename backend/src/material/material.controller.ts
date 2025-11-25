@@ -10,6 +10,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { MaterialService } from './material.service';
+import { MaterialApprovalService } from './material-approval.service';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
@@ -17,7 +18,10 @@ import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
 @Controller('materials')
 @UseGuards(JwtAuthGuard)
 export class MaterialController {
-  constructor(private readonly materialService: MaterialService) {}
+  constructor(
+    private readonly materialService: MaterialService,
+    private readonly approvalService: MaterialApprovalService,
+  ) {}
 
   @Post()
   create(@Request() req, @Body() createMaterialDto: CreateMaterialDto) {
@@ -29,15 +33,19 @@ export class MaterialController {
     return this.materialService.findAll(req.user.id);
   }
 
-  // Lead endpoints - must come before :id route
-  @Get('pending-lead-approval')
-  getPendingLeadApproval(@Request() req: { user: any }) {
-    return this.materialService.getPendingLeadApproval(req.user.id);
+  @Get('my-materials')
+  getMyMaterials(@Request() req) {
+    return this.materialService.findMyMaterials(req.user.id);
   }
 
-  @Get('approved-for-batching')
-  getApprovedMaterials(@Request() req: { user: any }) {
-    return this.materialService.getApprovedMaterials(req.user.id);
+  @Get('pending-approvals')
+  getPendingApprovals(@Request() req) {
+    return this.approvalService.getPendingApprovals(req.user.id);
+  }
+
+  @Get('inventory')
+  getInventory(@Request() req) {
+    return this.materialService.getInventory(req.user.id);
   }
 
   @Get(':id')
@@ -59,23 +67,17 @@ export class MaterialController {
     return this.materialService.remove(id, req.user.id);
   }
 
-  @Patch(':id/status')
-  updateStatus(
+  @Post(':id/approve')
+  approveMaterial(@Param('id') id: string, @Request() req) {
+    return this.approvalService.approveMaterial(id, req.user.id);
+  }
+
+  @Post(':id/reject')
+  rejectMaterial(
     @Param('id') id: string,
     @Request() req,
-    @Body() body: { status: 'APPROVED_BY_ADMIN' | 'REJECTED_BY_ADMIN' },
+    @Body() body: { reason: string },
   ) {
-    return this.materialService.updateStatus(id, req.user.id, body.status);
-  }
-
-  @Patch(':id/lead-approve')
-  leadApproveMaterial(@Param('id') id: string, @Request() req: { user: any }) {
-    return this.materialService.leadApproveMaterial(id, req.user.id);
-  }
-
-  @Patch(':id/lead-reject')
-  leadRejectMaterial(@Param('id') id: string, @Request() req: { user: any }) {
-    return this.materialService.leadRejectMaterial(id, req.user.id);
+    return this.approvalService.rejectMaterial(id, req.user.id, body.reason);
   }
 }
-
