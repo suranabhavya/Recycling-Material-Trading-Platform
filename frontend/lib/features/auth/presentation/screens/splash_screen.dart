@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recycling_platform/core/router/app_router.dart';
 import 'package:recycling_platform/core/theme/app_colors.dart';
-import 'package:recycling_platform/core/utils/color_extensions.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -39,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -48,68 +46,50 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacityValue(0.2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.white.withOpacityValue(0.3),
-                      blurRadius: 30,
-                      spreadRadius: 10,
-                    ),
-                  ],
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.border, width: 2),
                 ),
                 child: const Icon(
                   Icons.recycling,
                   size: 100,
-                  color: Colors.white,
+                  color: AppColors.primary,
                 ),
-              )
-                  .animate(onPlay: (controller) => controller.repeat(reverse: true))
-                  .scale(duration: 2000.ms, begin: const Offset(1, 1), end: const Offset(1.1, 1.1))
-                  .then()
-                  .shimmer(duration: 1500.ms, color: Colors.white.withOpacityValue(0.5)),
-              
+              ),
+
               const SizedBox(height: 40),
-              
+
               Text(
                 'Gravita',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   letterSpacing: 2,
                 ),
-              )
-                  .animate()
-                  .fadeIn(duration: 800.ms, delay: 300.ms)
-                  .slideY(begin: 0.3, end: 0),
-              
+              ),
+
               const SizedBox(height: 10),
-              
+
               Text(
                 'Recycling Platform',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 18,
                   fontWeight: FontWeight.w300,
-                  color: Colors.white.withOpacityValue(0.9),
+                  color: AppColors.textSecondary,
                   letterSpacing: 3,
                 ),
-              )
-                  .animate()
-                  .fadeIn(duration: 800.ms, delay: 500.ms)
-                  .slideY(begin: 0.3, end: 0),
-              
+              ),
+
               const SizedBox(height: 60),
-              
-              SizedBox(
+
+              const SizedBox(
                 width: 60,
                 height: 60,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withOpacityValue(0.8)),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                 ),
-              )
-                  .animate(onPlay: (controller) => controller.repeat())
-                  .fadeIn(duration: 600.ms, delay: 800.ms),
+              ),
             ],
           ),
         ),

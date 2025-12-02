@@ -25,8 +25,7 @@ dependencies:
   image_picker: ^1.0.7
   http: ^1.2.0
   
-  # UI & Animations
-  flutter_animate: ^4.5.0
+  # UI
   google_fonts: ^6.1.0
   flutter_screenutil: ^5.9.0
   glassmorphism: ^3.0.0

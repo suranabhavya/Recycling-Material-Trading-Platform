@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -88,7 +87,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -108,7 +107,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                         children: [
                           Text(
                             'Team Management',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -116,7 +115,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                           ),
                           Text(
                             'Admin Only',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 12,
                               color: Colors.orange,
                               fontWeight: FontWeight.w600,
@@ -144,7 +143,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                             const SizedBox(height: 16),
                             Text(
                               'Loading team members...',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 color: Colors.white.withOpacityValue(0.8),
                               ),
                             ),
@@ -166,7 +165,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                   const SizedBox(height: 16),
                                   Text(
                                     _error!,
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.domine(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
@@ -184,7 +183,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                     ),
                                     child: Text(
                                       'Retry',
-                                      style: GoogleFonts.poppins(color: Colors.white),
+                                      style: GoogleFonts.domine(color: Colors.white),
                                     ),
                                   ),
                                 ],
@@ -194,7 +193,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                         : RefreshIndicator(
                             onRefresh: _loadMembers,
                             color: AppColors.primary,
-                            backgroundColor: AppColors.darkGreen,
+                            backgroundColor: AppColors.primaryDark,
                             child: SingleChildScrollView(
                               physics: const AlwaysScrollableScrollPhysics(),
                               padding: const EdgeInsets.all(24),
@@ -207,7 +206,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                     children: [
                                       Text(
                                         'Team Members (${_members.length})',
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.domine(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -218,7 +217,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                         icon: Icon(_showInviteForm ? Icons.close : Icons.person_add, size: 18),
                                         label: Text(
                                           _showInviteForm ? 'Cancel' : 'Invite',
-                                          style: GoogleFonts.poppins(fontSize: 14),
+                                          style: GoogleFonts.domine(fontSize: 14),
                                         ),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: _showInviteForm ? Colors.red : AppColors.primary,
@@ -229,7 +228,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                         ),
                                       ),
                                     ],
-                                  ).animate().fadeIn(duration: 600.ms),
+                                  ),
                                   
                                   if (_showInviteForm) ...[
                                     const SizedBox(height: 16),
@@ -259,7 +258,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                           children: [
                                             Text(
                                               'Invite Team Member',
-                                              style: GoogleFonts.poppins(
+                                              style: GoogleFonts.domine(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.white,
@@ -307,7 +306,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                                 icon: const Icon(Icons.send, color: Colors.white),
                                                 label: Text(
                                                   'Send Invitation',
-                                                  style: GoogleFonts.poppins(color: Colors.white),
+                                                  style: GoogleFonts.domine(color: Colors.white),
                                                 ),
                                                 style: ElevatedButton.styleFrom(
                                                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -321,7 +320,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                           ],
                                         ),
                                       ),
-                                    ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
+                                    ),
                                   ],
                                   
                                   const SizedBox(height: 24),
@@ -356,7 +355,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                           const SizedBox(height: 16),
                                           Text(
                                             'No team members yet',
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.domine(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w600,
                                               color: Colors.white.withOpacityValue(0.8),
@@ -365,7 +364,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                           const SizedBox(height: 8),
                                           Text(
                                             'Invite team members to collaborate',
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.domine(
                                               fontSize: 14,
                                               color: Colors.white.withOpacityValue(0.6),
                                             ),
@@ -373,7 +372,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                           ),
                                         ],
                                       ),
-                                    ).animate().fadeIn(duration: 600.ms).scale()
+                                    )
                                   else
                                     ListView.builder(
                                       shrinkWrap: true,
@@ -396,10 +395,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                                           createdAt: member['createdAt'] as String?,
                                           isCurrentUser: isCurrentUser,
                                           isMemberAdmin: isMemberAdmin,
-                                        ).animate().fadeIn(
-                                          duration: 600.ms,
-                                          delay: (100 * index).ms,
-                                        ).slideX(begin: 0.2, end: 0);
+                                        );
                                       },
                                     ),
                                 ],
@@ -520,7 +516,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                       Flexible(
                         child: Text(
                           name,
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -537,7 +533,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                           ),
                           child: Text(
                             'You',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
@@ -550,7 +546,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                   const SizedBox(height: 4),
                   Text(
                     email,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 13,
                       color: Colors.white.withOpacityValue(0.7),
                     ),
@@ -564,7 +560,7 @@ class _TeamManagementScreenState extends ConsumerState<TeamManagementScreen> {
                     ),
                     child: Text(
                       roleName?.toUpperCase() ?? 'NO ROLE',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,

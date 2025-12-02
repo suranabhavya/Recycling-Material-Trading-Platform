@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -90,28 +89,28 @@ class TeamMemberDetailScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkGreen,
+        backgroundColor: AppColors.primaryDark,
         title: Text(
           'Update Role',
-          style: GoogleFonts.poppins(color: Colors.white),
+          style: GoogleFonts.domine(color: Colors.white),
         ),
         content: Text(
           'Are you sure you want to change $memberName\'s role to $roleDisplayName?',
-          style: GoogleFonts.poppins(color: Colors.white70),
+          style: GoogleFonts.domine(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'Cancel',
-              style: GoogleFonts.poppins(color: Colors.white70),
+              style: GoogleFonts.domine(color: Colors.white70),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               'Confirm',
-              style: GoogleFonts.poppins(color: _getRoleColor(newRole)),
+              style: GoogleFonts.domine(color: _getRoleColor(newRole)),
             ),
           ),
         ],
@@ -149,28 +148,28 @@ class TeamMemberDetailScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkGreen,
+        backgroundColor: AppColors.primaryDark,
         title: Text(
           'Kick Member',
-          style: GoogleFonts.poppins(color: Colors.white),
+          style: GoogleFonts.domine(color: Colors.white),
         ),
         content: Text(
           'Are you sure you want to kick $memberName from the company? Their approval status will be set to REJECTED.',
-          style: GoogleFonts.poppins(color: Colors.white70),
+          style: GoogleFonts.domine(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'Cancel',
-              style: GoogleFonts.poppins(color: Colors.white70),
+              style: GoogleFonts.domine(color: Colors.white70),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               'Kick',
-              style: GoogleFonts.poppins(color: AppColors.error),
+              style: GoogleFonts.domine(color: AppColors.error),
             ),
           ),
         ],
@@ -228,7 +227,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -245,7 +244,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'Team Member Details',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -313,7 +312,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                                   Flexible(
                                     child: Text(
                                       memberName,
-                                      style: GoogleFonts.poppins(
+                                      style: GoogleFonts.domine(
                                         fontSize: 28,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
@@ -331,7 +330,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                                       ),
                                       child: Text(
                                         'You',
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.domine(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                           color: AppColors.primary,
@@ -347,7 +346,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                               // Email
                               Text(
                                 memberEmail,
-                                style: GoogleFonts.poppins(
+                                style: GoogleFonts.domine(
                                   fontSize: 16,
                                   color: Colors.white.withOpacityValue(0.8),
                                 ),
@@ -369,7 +368,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                                 ),
                                 child: Text(
                                   _getRoleDisplayName(memberRole),
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.domine(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
@@ -381,7 +380,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                                 const SizedBox(height: 16),
                                 Text(
                                   'Joined ${_formatDate(createdAt)}',
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.domine(
                                     fontSize: 14,
                                     color: Colors.white.withOpacityValue(0.6),
                                   ),
@@ -390,7 +389,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms).scale(),
+                      ),
                       
                       // Only show actions if not current user and not admin
                       if (!isCurrentUser && !isMemberAdmin) ...[
@@ -398,12 +397,12 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                         
                         Text(
                           'Role Management',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
-                        ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                        ),
                         
                         const SizedBox(height: 16),
                         
@@ -414,7 +413,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                           subtitle: 'Grant full administrative access',
                           color: Colors.orange,
                           onTap: () => _updateRole(context, ref, 'ADMIN'),
-                        ).animate().fadeIn(duration: 600.ms, delay: 300.ms),
+                        ),
                         
                         const SizedBox(height: 12),
                         
@@ -428,7 +427,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                             subtitle: 'Grant team leadership privileges',
                             color: Colors.purple,
                             onTap: () => _updateRole(context, ref, 'LEAD'),
-                          ).animate().fadeIn(duration: 600.ms, delay: 350.ms),
+                          ),
                         
                         const SizedBox(height: 12),
                         
@@ -440,18 +439,18 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                             subtitle: 'Remove leadership privileges',
                             color: Colors.blue,
                             onTap: () => _updateRole(context, ref, 'MEMBER'),
-                          ).animate().fadeIn(duration: 600.ms, delay: 400.ms),
+                          ),
                         
                         const SizedBox(height: 32),
                         
                         Text(
                           'Danger Zone',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: AppColors.error,
                           ),
-                        ).animate().fadeIn(duration: 600.ms, delay: 450.ms),
+                        ),
                         
                         const SizedBox(height: 16),
                         
@@ -462,7 +461,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                           subtitle: 'Remove member from the company',
                           color: AppColors.error,
                           onTap: () => _kickMember(context, ref),
-                        ).animate().fadeIn(duration: 600.ms, delay: 500.ms),
+                        ),
                       ],
                       
                       // Message for current user or admin
@@ -498,7 +497,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                                 isCurrentUser 
                                     ? 'This is your profile' 
                                     : 'Admin accounts cannot be modified',
-                                style: GoogleFonts.poppins(
+                                style: GoogleFonts.domine(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
@@ -510,7 +509,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                                 isCurrentUser
                                     ? 'You cannot modify your own role or kick yourself'
                                     : 'Only other admins can modify admin accounts',
-                                style: GoogleFonts.poppins(
+                                style: GoogleFonts.domine(
                                   fontSize: 14,
                                   color: Colors.white.withOpacityValue(0.7),
                                 ),
@@ -518,7 +517,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                        ).animate().fadeIn(duration: 600.ms, delay: 300.ms),
+                        ),
                       ],
                     ],
                   ),
@@ -575,7 +574,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -584,7 +583,7 @@ class TeamMemberDetailScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 13,
                       color: Colors.white.withOpacityValue(0.7),
                     ),

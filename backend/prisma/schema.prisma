@@ -65,14 +65,30 @@ model RoleTemplate {
   requiresApproval  Boolean  @default(false) @map("requires_approval") // Does this role need approval before posting materials?
   description       String?  // Optional description of the role
 
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company           Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
   users             User[]
+  approvalPaths     ApprovalPath[]
 
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
   @@unique([companyId, level])
   @@map("role_templates")
+}
+
+// Defines approval sequence for a role
+model ApprovalPath {
+  id                String       @id @default(uuid())
+  roleTemplateId    String       @map("role_template_id")
+  roleTemplate      RoleTemplate @relation(fields: [roleTemplateId], references: [id], onDelete: Cascade)
+
+  approverLevel     Int          @map("approver_level")  // Which level must approve
+  sequenceOrder     Int          @map("sequence_order")  // Order in the chain (1, 2, 3...)
+
+  createdAt         DateTime     @default(now()) @map("created_at")
+
+  @@unique([roleTemplateId, sequenceOrder])
+  @@map("approval_paths")
 }
 
 // Organizational units define WHERE users work (structure/geography)
@@ -128,6 +144,7 @@ model User {
   // Materials
   createdMaterials        Material[]            @relation("CreatedMaterials")
   approvedMaterials       Material[]            @relation("ApprovedMaterials")
+  approvalActions         ApprovalHistory[]     @relation("ApprovalActions")
 
   createdAt               DateTime              @default(now()) @map("created_at")
   updatedAt               DateTime              @updatedAt @map("updated_at")
@@ -136,7 +153,7 @@ model User {
 }
 
 // ============================================
-// MATERIALS
+// MATERIALS & APPROVAL SYSTEM
 // ============================================
 
 model Material {
@@ -151,8 +168,13 @@ model Material {
 
   // Approval tracking
   currentApprovalLevel  Int?           @map("current_approval_level") // Which level needs to approve next (null if approved/rejected)
-  approvalChain         Json           @default("[]") @map("approval_chain") // History: [{ level: 2, userId: "...", approvedAt: "...", action: "approved" }]
+  requiredApprovalLevels Int[]         @default([]) @map("required_approval_levels") // Snapshot at creation: [4, 3, 2]
+  approvalHistory       ApprovalHistory[]
   rejectionReason       String?        @map("rejection_reason")
+
+  // Snapshot creator's reporting structure (for determining who should approve)
+  creatorOrgUnitId      String?        @map("creator_org_unit_id")   // For ADVANCED mode
+  creatorManagerId      String?        @map("creator_manager_id")    // For SIMPLE mode
 
   // Creator
   creatorId             String         @map("creator_id")
@@ -171,6 +193,31 @@ model Material {
   updatedAt             DateTime       @updatedAt @map("updated_at")
 
   @@map("materials")
+  @@index([currentApprovalLevel, status])  // Fast: "Show pending at level 3"
+  @@index([creatorOrgUnitId])             // Fast: "From my org unit"
+  @@index([creatorManagerId])             // Fast: "From my subordinates"
+}
+
+// Tracks every approval action (replaces JSON approvalChain)
+model ApprovalHistory {
+  id            String         @id @default(uuid())
+  materialId    String         @map("material_id")
+  material      Material       @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  level         Int           // Which level approved/rejected
+  userId        String         @map("user_id")
+  user          User           @relation("ApprovalActions", fields: [userId], references: [id])
+
+  action        ApprovalStatus // APPROVED or REJECTED
+  comments      String?        // Rejection reason or approval notes
+  timeTakenMs   Int?           @map("time_taken_ms") // For analytics: time from material creation/previous approval
+
+  approvedAt    DateTime       @default(now()) @map("approved_at")
+
+  @@map("approval_history")
+  @@index([materialId])
+  @@index([userId, approvedAt])
+  @@index([level, action])
 }
 
 // ============================================

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recycling_platform/core/router/app_router.dart';
 import 'package:recycling_platform/core/theme/app_colors.dart';
-import 'package:recycling_platform/core/utils/color_extensions.dart';
 import 'package:recycling_platform/features/auth/presentation/providers/auth_provider.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -66,13 +64,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Color _getRoleColor(String? role) {
     switch (role?.toUpperCase()) {
       case 'ADMIN':
-        return Colors.orange;
+        return AppColors.warning;
       case 'LEAD':
-        return Colors.purple;
+        return AppColors.info;
       case 'MEMBER':
-        return Colors.blue;
+        return AppColors.primary;
       default:
-        return Colors.grey;
+        return AppColors.textSecondary;
     }
   }
 
@@ -115,88 +113,74 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final userRole = isAdmin 
         ? 'ADMIN' 
         : (user?.roleTemplate?.name.toUpperCase() ?? 'MEMBER');
+    final hasRoleTemplate = user?.roleTemplate != null;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Profile',
-                  style: GoogleFonts.poppins(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+    return Container(
+      decoration: const BoxDecoration(color: AppColors.background),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Profile',
+                    style: GoogleFonts.domine(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                icon: _isRefreshing 
-                    ? SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Icon(Icons.refresh, color: Colors.white),
-                onPressed: _isRefreshing ? null : _refreshUserData,
-                tooltip: 'Refresh profile data',
-              ),
-            ],
-          ).animate().fadeIn(duration: 600.ms),
-          
-          const SizedBox(height: 8),
-          
-          Text(
-            'Manage your account and settings',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              color: Colors.white.withOpacityValue(0.8),
+                IconButton(
+                  icon: _isRefreshing 
+                      ? SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Icon(Icons.refresh, color: AppColors.primary),
+                  onPressed: _isRefreshing ? null : _refreshUserData,
+                  tooltip: 'Refresh profile data',
+                ),
+              ],
             ),
-          ).animate().fadeIn(duration: 600.ms, delay: 100.ms),
-          
-          const SizedBox(height: 30),
-          
-          if (user != null) ...[
-            // Compact Profile Header
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withOpacityValue(0.2),
-                    Colors.white.withOpacityValue(0.1),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: Colors.white.withOpacityValue(0.3),
-                  width: 1.5,
-                ),
+            
+            const SizedBox(height: 10),
+            
+            Text(
+              'Manage your account and settings',
+              style: GoogleFonts.domine(
+                fontSize: 16,
+                color: AppColors.textSecondary,
               ),
-              child: Padding(
+            ),
+          
+            const SizedBox(height: 30),
+            
+            if (user != null) ...[
+              // Compact Profile Header
+              Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.white.withOpacityValue(0.3),
-                            Colors.white.withOpacityValue(0.1),
-                          ],
-                        ),
+                        color: AppColors.primary.withOpacity(0.1),
                       ),
-                      child: const Icon(Icons.person, size: 32, color: Colors.white),
+                      child: const Icon(Icons.person, size: 32, color: AppColors.primary),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -205,18 +189,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         children: [
                           Text(
                             user.name,
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             user.email,
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              color: Colors.white.withOpacityValue(0.8),
+                            style: GoogleFonts.domine(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -225,23 +209,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                 ),
               ),
-            ).animate().fadeIn(duration: 600.ms, delay: 200.ms).slideY(begin: 0.2, end: 0),
             
-            const SizedBox(height: 20),
+            
+            if (hasRoleTemplate) const SizedBox(height: 20),
             
             // Quick Info Cards
             Row(
               children: [
-                Expanded(
-                  child: _buildInfoCard(
-                    icon: _getRoleIcon(userRole),
-                    label: 'Role',
-                    value: _getRoleDisplayName(userRole),
-                    color: _getRoleColor(userRole),
+                if (hasRoleTemplate) ...[
+                  Expanded(
+                    child: _buildInfoCard(
+                      icon: _getRoleIcon(userRole),
+                      label: 'Role',
+                      value: _getRoleDisplayName(userRole),
+                      color: _getRoleColor(userRole),
+                    ),
                   ),
-                ),
-                if (user.company != null) ...[
-                  const SizedBox(width: 12),
+                  if (user.company != null) const SizedBox(width: 12),
+                ],
+                if (user.company != null)
                   Expanded(
                     child: _buildInfoCard(
                       icon: Icons.business,
@@ -252,11 +238,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       color: AppColors.primary,
                     ),
                   ),
-                ],
               ],
-            ).animate().fadeIn(duration: 600.ms, delay: 300.ms),
+            ),
             
-            if (user.companyApprovalStatus != null) ...[
+            if (hasRoleTemplate && user.companyApprovalStatus != null) ...[
               const SizedBox(height: 12),
               _buildInfoCard(
                 icon: Icons.verified_user,
@@ -264,7 +249,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 value: user.companyApprovalStatus!.toUpperCase(),
                 color: _getStatusColor(user.companyApprovalStatus),
                 emoji: _getStatusEmoji(user.companyApprovalStatus),
-              ).animate().fadeIn(duration: 600.ms, delay: 350.ms),
+              ),
             ],
             
             const SizedBox(height: 30),
@@ -272,12 +257,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             // Settings Section Title
             Text(
               'Settings',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
               ),
-            ).animate().fadeIn(duration: 600.ms, delay: 400.ms),
+            ),
             
             const SizedBox(height: 16),
             
@@ -287,7 +272,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               label: 'Personal Settings',
               subtitle: 'Edit your profile information',
               onTap: () => context.push(AppRouter.personalSettings),
-            ).animate().fadeIn(duration: 600.ms, delay: 450.ms),
+            ),
             
             const SizedBox(height: 12),
             
@@ -299,8 +284,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Approve team materials',
                 onTap: () => context.push(AppRouter.leadDashboard),
                 badgeText: 'LEAD',
-                badgeColor: Colors.purple,
-              ).animate().fadeIn(duration: 600.ms, delay: 475.ms),
+                badgeColor: AppColors.info,
+              ),
               
               const SizedBox(height: 12),
             ],
@@ -313,8 +298,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Manage company information',
                 onTap: () => context.push(AppRouter.companySettings),
                 badgeText: 'ADMIN',
-                badgeColor: Colors.orange,
-              ).animate().fadeIn(duration: 600.ms, delay: 500.ms),
+                badgeColor: AppColors.warning,
+              ),
               
               const SizedBox(height: 12),
               
@@ -325,8 +310,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Review member join requests',
                 onTap: () => context.push(AppRouter.manageApprovals),
                 badgeText: 'ADMIN',
-                badgeColor: Colors.orange,
-              ).animate().fadeIn(duration: 600.ms, delay: 525.ms),
+                badgeColor: AppColors.warning,
+              ),
               
               const SizedBox(height: 12),
               
@@ -337,8 +322,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Manage company members',
                 onTap: () => context.push(AppRouter.teamManagement),
                 badgeText: 'ADMIN',
-                badgeColor: Colors.orange,
-              ).animate().fadeIn(duration: 600.ms, delay: 550.ms),
+                badgeColor: AppColors.warning,
+              ),
               
               const SizedBox(height: 12),
               
@@ -349,8 +334,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Assign members to leads',
                 onTap: () => context.push(AppRouter.hierarchyManagement),
                 badgeText: 'ADMIN',
-                badgeColor: Colors.orange,
-              ).animate().fadeIn(duration: 600.ms, delay: 575.ms),
+                badgeColor: AppColors.warning,
+              ),
               
               const SizedBox(height: 12),
               
@@ -361,8 +346,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Review and approve batches',
                 onTap: () => context.push(AppRouter.adminBatchApproval),
                 badgeText: 'ADMIN',
-                badgeColor: Colors.orange,
-              ).animate().fadeIn(duration: 600.ms, delay: 600.ms),
+                badgeColor: AppColors.warning,
+              ),
               
               const SizedBox(height: 12),
             ],
@@ -373,7 +358,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               label: 'Notifications',
               subtitle: 'Manage notification preferences',
               onTap: () => context.push(AppRouter.notificationSettings),
-            ).animate().fadeIn(duration: 600.ms, delay: 600.ms),
+            ),
             
             const SizedBox(height: 12),
             
@@ -383,7 +368,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               label: 'Privacy & Security',
               subtitle: 'Control your privacy settings',
               onTap: () => context.push(AppRouter.privacySettings),
-            ).animate().fadeIn(duration: 600.ms, delay: 650.ms),
+            ),
             
             const SizedBox(height: 12),
             
@@ -393,7 +378,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               label: 'Help & Support',
               subtitle: 'FAQs and contact support',
               onTap: () => context.push(AppRouter.helpSupport),
-            ).animate().fadeIn(duration: 600.ms, delay: 700.ms),
+            ),
             
             const SizedBox(height: 24),
             
@@ -407,28 +392,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 final shouldLogout = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
-                    backgroundColor: AppColors.darkGreen,
+                    backgroundColor: AppColors.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: AppColors.border, width: 1.5),
+                    ),
                     title: Text(
                       'Logout',
-                      style: GoogleFonts.poppins(color: Colors.white),
+                      style: GoogleFonts.domine(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     content: Text(
                       'Are you sure you want to logout?',
-                      style: GoogleFonts.poppins(color: Colors.white70),
+                      style: GoogleFonts.domine(color: AppColors.textSecondary),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
                         child: Text(
                           'Cancel',
-                          style: GoogleFonts.poppins(color: Colors.white70),
+                          style: GoogleFonts.domine(color: AppColors.textSecondary),
                         ),
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context, true),
                         child: Text(
                           'Logout',
-                          style: GoogleFonts.poppins(color: AppColors.error),
+                          style: GoogleFonts.domine(
+                            color: AppColors.error,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
@@ -442,11 +437,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   }
                 }
               },
-            ).animate().fadeIn(duration: 600.ms, delay: 750.ms),
+            ),
             
             const SizedBox(height: 100), // Extra space for bottom nav
           ],
         ],
+      ),
       ),
     );
   }
@@ -461,36 +457,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withOpacityValue(0.2),
-            Colors.white.withOpacityValue(0.1),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withOpacityValue(0.3),
-          width: 1.5,
-        ),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacityValue(0.2),
-              borderRadius: BorderRadius.circular(10),
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(height: 10),
           Text(
             label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 11,
-              color: Colors.white.withOpacityValue(0.7),
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 4),
@@ -504,10 +489,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Flexible(
                 child: Text(
                   value,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
@@ -529,7 +514,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     String? badgeText,
     Color? badgeColor,
   }) {
-    final textColor = color ?? Colors.white;
+    final iconColor = color ?? AppColors.primary;
+    final textColor = color ?? AppColors.textPrimary;
     
     return GestureDetector(
       onTap: onTap,
@@ -537,29 +523,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.white.withOpacityValue(0.2),
-              Colors.white.withOpacityValue(0.1),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.white.withOpacityValue(0.3),
-            width: 1.5,
-          ),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: (color ?? Colors.white).withOpacityValue(0.2),
-                borderRadius: BorderRadius.circular(12),
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: textColor, size: 24),
+              child: Icon(icon, color: iconColor, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -570,7 +545,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     children: [
                       Text(
                         label,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: textColor,
@@ -581,14 +556,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: (badgeColor ?? Colors.orange).withOpacityValue(0.3),
+                            color: (badgeColor ?? Colors.orange).withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: badgeColor ?? Colors.orange,
+                              width: 1,
+                            ),
                           ),
                           child: Text(
                             badgeText,
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                               color: badgeColor ?? Colors.orange,
                             ),
                           ),
@@ -599,15 +578,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 13,
-                      color: textColor.withOpacityValue(0.7),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, color: textColor, size: 16),
+            Icon(Icons.arrow_forward_ios, color: AppColors.textSecondary, size: 16),
           ],
         ),
       ),

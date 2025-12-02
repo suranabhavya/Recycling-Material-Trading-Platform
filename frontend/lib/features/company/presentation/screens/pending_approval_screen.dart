@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recycling_platform/core/theme/app_colors.dart';
@@ -14,7 +13,7 @@ class PendingApprovalScreen extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -28,42 +27,42 @@ class PendingApprovalScreen extends StatelessWidget {
                     color: Colors.white.withOpacityValue(0.2),
                   ),
                   child: const Icon(Icons.hourglass_empty, size: 80, color: Colors.white),
-                ).animate().scale(duration: 800.ms),
+                ),
                 
                 const SizedBox(height: 40),
                 
                 Text(
                   '⏳ Pending Approval',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                   textAlign: TextAlign.center,
-                ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                ),
                 
                 const SizedBox(height: 20),
                 
                 Text(
                   'Your request has been sent to the company admin for approval.',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 16,
                     color: Colors.white.withOpacityValue(0.9),
                   ),
                   textAlign: TextAlign.center,
-                ).animate().fadeIn(duration: 600.ms, delay: 400.ms),
+                ),
                 
                 const SizedBox(height: 10),
                 
                 Text(
                   'While you wait, explore the app!',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.accentOrange,
+                    color: AppColors.warning,
                   ),
                   textAlign: TextAlign.center,
-                ).animate().fadeIn(duration: 600.ms, delay: 600.ms),
+                ),
                 
                 const SizedBox(height: 50),
                 
@@ -71,7 +70,7 @@ class PendingApprovalScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 56,
                   decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -92,13 +91,13 @@ class PendingApprovalScreen extends StatelessWidget {
                     ),
                     child: Text(
                       '🚀 Explore App',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                ).animate().fadeIn(duration: 600.ms, delay: 800.ms).slideY(begin: 0.3, end: 0),
+                ),
               ],
             ),
           ),

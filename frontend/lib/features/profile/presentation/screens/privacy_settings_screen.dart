@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -26,7 +25,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -42,7 +41,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                     const SizedBox(width: 8),
                     Text(
                       'Privacy & Security',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -62,12 +61,12 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                       // Privacy Settings
                       Text(
                         'Privacy',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
@@ -118,19 +117,19 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                             ],
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 100.ms).slideY(begin: 0.2, end: 0),
+                      ),
                       
                       const SizedBox(height: 30),
                       
                       // Security Settings
                       Text(
                         'Security',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
@@ -175,19 +174,19 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                             ],
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 300.ms).slideY(begin: 0.2, end: 0),
+                      ),
                       
                       const SizedBox(height: 30),
                       
                       // Data & Storage
                       Text(
                         'Data & Storage',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 400.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
@@ -243,21 +242,21 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                                   showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
-                                      backgroundColor: AppColors.darkGreen,
+                                      backgroundColor: AppColors.primaryDark,
                                       title: Text(
                                         'Delete Account',
-                                        style: GoogleFonts.poppins(color: Colors.white),
+                                        style: GoogleFonts.domine(color: Colors.white),
                                       ),
                                       content: Text(
                                         'This action cannot be undone. All your data will be permanently deleted.',
-                                        style: GoogleFonts.poppins(color: Colors.white70),
+                                        style: GoogleFonts.domine(color: Colors.white70),
                                       ),
                                       actions: [
                                         TextButton(
                                           onPressed: () => Navigator.pop(context),
                                           child: Text(
                                             'Cancel',
-                                            style: GoogleFonts.poppins(color: Colors.white70),
+                                            style: GoogleFonts.domine(color: Colors.white70),
                                           ),
                                         ),
                                         TextButton(
@@ -272,7 +271,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                                           },
                                           child: Text(
                                             'Delete',
-                                            style: GoogleFonts.poppins(color: AppColors.error),
+                                            style: GoogleFonts.domine(color: AppColors.error),
                                           ),
                                         ),
                                       ],
@@ -283,7 +282,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                             ],
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 500.ms).slideY(begin: 0.2, end: 0),
+                      ),
                       
                       const SizedBox(height: 30),
                       
@@ -309,14 +308,14 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                           ),
                           child: Text(
                             'Save Settings',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 600.ms),
+                      ),
                     ],
                   ),
                 ),
@@ -354,7 +353,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -363,7 +362,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 12,
                     color: Colors.white.withOpacityValue(0.7),
                   ),
@@ -415,7 +414,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: tileColor,
@@ -424,7 +423,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 12,
                       color: tileColor.withOpacityValue(0.7),
                     ),

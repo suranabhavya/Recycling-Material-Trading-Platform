@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -64,7 +63,7 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -84,7 +83,7 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
                         children: [
                           Text(
                             'Company Settings',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -92,7 +91,7 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
                           ),
                           Text(
                             'Admin Only',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 12,
                               color: Colors.orange,
                               fontWeight: FontWeight.w600,
@@ -115,12 +114,12 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
                       // Company Information Section
                       Text(
                         'Company Information',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
@@ -253,7 +252,7 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
                                           ),
                                           child: Text(
                                             'Cancel',
-                                            style: GoogleFonts.poppins(color: Colors.white),
+                                            style: GoogleFonts.domine(color: Colors.white),
                                           ),
                                         ),
                                       ),
@@ -281,7 +280,7 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
                                           ),
                                           child: Text(
                                             'Save Changes',
-                                            style: GoogleFonts.poppins(color: Colors.white),
+                                            style: GoogleFonts.domine(color: Colors.white),
                                           ),
                                         ),
                                       ),
@@ -295,7 +294,7 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
                                       icon: const Icon(Icons.edit, color: Colors.white),
                                       label: Text(
                                         'Edit Company Information',
-                                        style: GoogleFonts.poppins(color: Colors.white),
+                                        style: GoogleFonts.domine(color: Colors.white),
                                       ),
                                       style: ElevatedButton.styleFrom(
                                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -310,19 +309,19 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
                             ),
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 100.ms).slideY(begin: 0.2, end: 0),
+                      ),
                       
                       const SizedBox(height: 30),
                       
                       // Company Status Section
                       Text(
                         'Company Status',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
@@ -356,7 +355,7 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
                             const SizedBox(height: 16),
                             Text(
                               user?.companyApprovalStatus?.toUpperCase() ?? 'UNKNOWN',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -369,7 +368,7 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
                                   : user?.companyApprovalStatus?.toUpperCase() == 'PENDING'
                                       ? 'Your company registration is under review'
                                       : 'Contact support for assistance',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 fontSize: 14,
                                 color: Colors.white.withOpacityValue(0.7),
                               ),
@@ -377,7 +376,7 @@ class _CompanySettingsScreenState extends ConsumerState<CompanySettingsScreen> {
                             ),
                           ],
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 300.ms).slideY(begin: 0.2, end: 0),
+                      ),
                     ],
                   ),
                 ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,7 +27,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -44,7 +43,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                     const SizedBox(width: 8),
                     Text(
                       'Notification Settings',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -64,12 +63,12 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                       // General Notifications
                       Text(
                         'General',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
@@ -112,19 +111,19 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                             ],
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 100.ms).slideY(begin: 0.2, end: 0),
+                      ),
                       
                       const SizedBox(height: 30),
                       
                       // Activity Notifications
                       Text(
                         'Activity',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
@@ -175,19 +174,19 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                             ],
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 300.ms).slideY(begin: 0.2, end: 0),
+                      ),
                       
                       const SizedBox(height: 30),
                       
                       // System Notifications
                       Text(
                         'System',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 400.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
@@ -230,7 +229,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                             ],
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 500.ms).slideY(begin: 0.2, end: 0),
+                      ),
                       
                       const SizedBox(height: 30),
                       
@@ -256,14 +255,14 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                           ),
                           child: Text(
                             'Save Preferences',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 600.ms),
+                      ),
                     ],
                   ),
                 ),
@@ -301,7 +300,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -310,7 +309,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 12,
                     color: Colors.white.withOpacityValue(0.7),
                   ),

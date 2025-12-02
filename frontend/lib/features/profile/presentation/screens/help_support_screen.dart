@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,7 +14,7 @@ class HelpSupportScreen extends ConsumerWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -31,7 +30,7 @@ class HelpSupportScreen extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Help & Support',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -51,12 +50,12 @@ class HelpSupportScreen extends ConsumerWidget {
                       // Quick Actions
                       Text(
                         'Quick Actions',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
@@ -98,66 +97,66 @@ class HelpSupportScreen extends ConsumerWidget {
                             ),
                           ),
                         ],
-                      ).animate().fadeIn(duration: 600.ms, delay: 100.ms),
+                      ),
                       
                       const SizedBox(height: 30),
                       
                       // FAQs
                       Text(
                         'Frequently Asked Questions',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
                       _buildFAQItem(
                         question: 'How do I register my company?',
                         answer: 'Navigate to the company selection screen after login and tap on "Register New Company". Fill in the required details and submit for approval.',
-                      ).animate().fadeIn(duration: 600.ms, delay: 250.ms),
+                      ),
                       
                       const SizedBox(height: 12),
                       
                       _buildFAQItem(
                         question: 'How long does company approval take?',
                         answer: 'Company approval typically takes 1-2 business days. You\'ll receive an email notification once your company is approved.',
-                      ).animate().fadeIn(duration: 600.ms, delay: 300.ms),
+                      ),
                       
                       const SizedBox(height: 12),
                       
                       _buildFAQItem(
                         question: 'How do I add scrap materials?',
                         answer: 'Once your company is approved, navigate to the "Add Scrap" tab from the bottom navigation. Fill in the material details and submit for listing.',
-                      ).animate().fadeIn(duration: 600.ms, delay: 350.ms),
+                      ),
                       
                       const SizedBox(height: 12),
                       
                       _buildFAQItem(
                         question: 'Can I invite team members?',
                         answer: 'Yes, if you\'re a company admin, you can invite team members from the Team Management section in your profile settings.',
-                      ).animate().fadeIn(duration: 600.ms, delay: 400.ms),
+                      ),
                       
                       const SizedBox(height: 12),
                       
                       _buildFAQItem(
                         question: 'How do I change my password?',
                         answer: 'Go to Profile > Personal Settings and click on "Change Password". You\'ll need to enter your current password and choose a new one.',
-                      ).animate().fadeIn(duration: 600.ms, delay: 450.ms),
+                      ),
                       
                       const SizedBox(height: 30),
                       
                       // Help Resources
                       Text(
                         'Help Resources',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 500.ms),
+                      ),
                       
                       const SizedBox(height: 16),
                       
@@ -174,7 +173,7 @@ class HelpSupportScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                      ).animate().fadeIn(duration: 600.ms, delay: 550.ms),
+                      ),
                       
                       const SizedBox(height: 12),
                       
@@ -191,7 +190,7 @@ class HelpSupportScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                      ).animate().fadeIn(duration: 600.ms, delay: 600.ms),
+                      ),
                       
                       const SizedBox(height: 12),
                       
@@ -208,7 +207,7 @@ class HelpSupportScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                      ).animate().fadeIn(duration: 600.ms, delay: 650.ms),
+                      ),
                       
                       const SizedBox(height: 12),
                       
@@ -225,7 +224,7 @@ class HelpSupportScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                      ).animate().fadeIn(duration: 600.ms, delay: 700.ms),
+                      ),
                       
                       const SizedBox(height: 30),
                       
@@ -258,7 +257,7 @@ class HelpSupportScreen extends ConsumerWidget {
                             const SizedBox(height: 16),
                             Text(
                               'Recycling Material Platform',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -267,7 +266,7 @@ class HelpSupportScreen extends ConsumerWidget {
                             const SizedBox(height: 8),
                             Text(
                               'Version 1.0.0',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 fontSize: 14,
                                 color: Colors.white.withOpacityValue(0.7),
                               ),
@@ -275,7 +274,7 @@ class HelpSupportScreen extends ConsumerWidget {
                             const SizedBox(height: 16),
                             Text(
                               '© 2025 Recycling Platform. All rights reserved.',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 fontSize: 12,
                                 color: Colors.white.withOpacityValue(0.6),
                               ),
@@ -283,7 +282,7 @@ class HelpSupportScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 750.ms),
+                      ),
                     ],
                   ),
                 ),
@@ -335,7 +334,7 @@ class HelpSupportScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               title,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
@@ -344,7 +343,7 @@ class HelpSupportScreen extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 fontSize: 11,
                 color: Colors.white.withOpacityValue(0.7),
               ),
@@ -392,7 +391,7 @@ class HelpSupportScreen extends ConsumerWidget {
           childrenPadding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
           title: Text(
             question,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -401,7 +400,7 @@ class HelpSupportScreen extends ConsumerWidget {
           children: [
             Text(
               answer,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 fontSize: 13,
                 color: Colors.white.withOpacityValue(0.8),
                 height: 1.5,
@@ -457,7 +456,7 @@ class HelpSupportScreen extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -466,7 +465,7 @@ class HelpSupportScreen extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 12,
                       color: Colors.white.withOpacityValue(0.7),
                     ),

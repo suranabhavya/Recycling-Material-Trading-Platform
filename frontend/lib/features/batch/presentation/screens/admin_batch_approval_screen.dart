@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -71,7 +70,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -91,7 +90,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                         children: [
                           Text(
                             'Batch Approvals',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -99,7 +98,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                           ),
                           Text(
                             'Review batches from leads',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 12,
                               color: Colors.orange,
                               fontWeight: FontWeight.w600,
@@ -127,7 +126,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                             const SizedBox(height: 16),
                             Text(
                               'Loading batches...',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 color: Colors.white.withOpacityValue(0.8),
                               ),
                             ),
@@ -149,7 +148,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                                   const SizedBox(height: 16),
                                   Text(
                                     _error!,
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.domine(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
@@ -167,7 +166,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                                     ),
                                     child: Text(
                                       'Retry',
-                                      style: GoogleFonts.poppins(color: Colors.white),
+                                      style: GoogleFonts.domine(color: Colors.white),
                                     ),
                                   ),
                                 ],
@@ -189,7 +188,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                                       const SizedBox(height: 20),
                                       Text(
                                         'No Pending Batches',
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.domine(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -198,7 +197,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                                       const SizedBox(height: 8),
                                       Text(
                                         'All batches have been reviewed',
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.domine(
                                           fontSize: 14,
                                           color: Colors.white.withOpacityValue(0.6),
                                         ),
@@ -207,11 +206,11 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                                     ],
                                   ),
                                 ),
-                              ).animate().fadeIn(duration: 600.ms).scale()
+                              )
                             : RefreshIndicator(
                                 onRefresh: _loadBatches,
                                 color: AppColors.primary,
-                                backgroundColor: AppColors.darkGreen,
+                                backgroundColor: AppColors.primaryDark,
                                 child: ListView.builder(
                                   padding: const EdgeInsets.all(16),
                                   itemCount: _pendingBatches.length,
@@ -274,7 +273,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                     children: [
                       Text(
                         batch.name,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -284,7 +283,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                       if (batch.lead != null)
                         Text(
                           'By ${batch.lead!.name}',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 13,
                             color: Colors.white.withOpacityValue(0.7),
                           ),
@@ -305,7 +304,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                       const SizedBox(width: 6),
                       Text(
                         batch.materialCount.toString(),
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -320,7 +319,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
               const SizedBox(height: 12),
               Text(
                 batch.description!,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 13,
                   color: Colors.white.withOpacityValue(0.7),
                 ),
@@ -339,7 +338,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                 const SizedBox(width: 6),
                 Text(
                   'Submitted ${_formatDate(batch.submittedAt)}',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 12,
                     color: Colors.white.withOpacityValue(0.6),
                   ),
@@ -349,7 +348,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
           ],
         ),
       ),
-    ).animate().fadeIn(duration: 600.ms, delay: (100 * index).ms).slideX(begin: 0.2, end: 0);
+    );
   }
 
   String _formatDate(DateTime? date) {
@@ -380,8 +379,8 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.darkGreen,
-              AppColors.darkGreen.withOpacityValue(0.9),
+              AppColors.primaryDark,
+              AppColors.primaryDark.withOpacityValue(0.9),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -413,7 +412,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                     children: [
                       Text(
                         batch.name,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -423,7 +422,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                       if (batch.lead != null)
                         Text(
                           'Submitted by ${batch.lead!.name}',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 14,
                             color: Colors.white.withOpacityValue(0.7),
                           ),
@@ -456,7 +455,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                       // Materials List
                       Text(
                         'Materials in Batch',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -486,7 +485,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                                   children: [
                                     Text(
                                       material.name,
-                                      style: GoogleFonts.poppins(
+                                      style: GoogleFonts.domine(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
@@ -494,7 +493,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                                     ),
                                     Text(
                                       '${material.quantity} ${material.unit}',
-                                      style: GoogleFonts.poppins(
+                                      style: GoogleFonts.domine(
                                         fontSize: 12,
                                         color: Colors.white.withOpacityValue(0.7),
                                       ),
@@ -524,7 +523,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                         icon: const Icon(Icons.close, color: Colors.white),
                         label: Text(
                           'Reject',
-                          style: GoogleFonts.poppins(color: Colors.white),
+                          style: GoogleFonts.domine(color: Colors.white),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
@@ -542,7 +541,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
                         icon: const Icon(Icons.check, color: Colors.white),
                         label: Text(
                           'Approve',
-                          style: GoogleFonts.poppins(color: Colors.white),
+                          style: GoogleFonts.domine(color: Colors.white),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
@@ -582,7 +581,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
           const SizedBox(height: 8),
           Text(
             value,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -590,7 +589,7 @@ class _AdminBatchApprovalScreenState extends ConsumerState<AdminBatchApprovalScr
           ),
           Text(
             label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 12,
               color: Colors.white.withOpacityValue(0.7),
             ),

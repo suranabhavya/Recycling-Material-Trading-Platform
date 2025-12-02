@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recycling_platform/core/router/app_router.dart';
 import 'package:recycling_platform/core/theme/app_colors.dart';
-import 'package:recycling_platform/core/utils/color_extensions.dart';
 import 'package:recycling_platform/features/auth/presentation/providers/auth_provider.dart';
 
 class VerifyOtpScreen extends ConsumerStatefulWidget {
@@ -49,15 +48,13 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Email verified successfully!'), backgroundColor: AppColors.success),
         );
-        context.go('/company-selection');
+        context.go(AppRouter.home);
       }
     });
 
     return Scaffold(
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -65,37 +62,26 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacityValue(0.2),
-                    ),
-                    child: const Icon(Icons.email_outlined, size: 60, color: Colors.white),
-                  )
-                      .animate()
-                      .scale(duration: 600.ms),
+                  const Icon(Icons.email_outlined, size: 80, color: AppColors.primary),
                   
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
                   
                   Text(
                     'Verify Your Email',
-                    style: GoogleFonts.poppins(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                    style: GoogleFonts.domine(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textPrimary,
                     ),
-                  )
-                      .animate()
-                      .fadeIn(duration: 600.ms, delay: 200.ms),
+                  ),
                   
                   const SizedBox(height: 10),
                   
                   Text(
                     'Enter the 6-digit code sent to',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.white.withOpacityValue(0.8),
+                    style: GoogleFonts.domine(
+                      fontSize: 16,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   
@@ -103,127 +89,126 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
                   
                   Text(
                     widget.email,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
                   
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: Colors.white.withOpacityValue(0.3),
-                        width: 1.5,
-                      ),
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.white.withOpacityValue(0.2),
-                          Colors.white.withOpacityValue(0.1),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: _otpController,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _otpController,
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          decoration: InputDecoration(
+                            hintText: '000000',
+                            hintStyle: TextStyle(
+                              color: AppColors.textTertiary,
                               letterSpacing: 16,
                             ),
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            maxLength: 6,
-                            decoration: InputDecoration(
-                              hintText: '000000',
-                              hintStyle: TextStyle(
-                                color: Colors.white.withOpacityValue(0.3),
-                                letterSpacing: 16,
-                              ),
-                              counterText: '',
-                              border: InputBorder.none,
+                            counterText: '',
+                            filled: true,
+                            fillColor: AppColors.surface,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2),
                             ),
-                            onChanged: (value) {
-                              if (value.length == 6) {
-                                _handleVerify();
-                              }
-                            },
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2.5),
+                            ),
                           ),
-                          
-                          const SizedBox(height: 30),
-                          
-                          Container(
-                            width: double.infinity,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              gradient: AppColors.primaryGradient,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withOpacityValue(0.5),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton(
-                              onPressed: authState.isLoading ? null : _handleVerify,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
+                          onChanged: (value) {
+                            if (value.length == 6) {
+                              _handleVerify();
+                            }
+                          },
+                        ),
+                        
+                        const SizedBox(height: 20),
+                        
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: authState.isLoading ? null : _handleVerify,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              elevation: 16,
+                              shadowColor: AppColors.shadow,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              child: authState.isLoading
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Text(
-                                      'Verify',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                            ),
+                            child: authState.isLoading
+                                ? const SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
                                     ),
-                            ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Verify',
+                                        style: GoogleFonts.domine(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      const Icon(
+                                        Icons.east,
+                                        color: Colors.white,
+                                        size: 26,
+                                      ),
+                                    ],
+                                  ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 30),
                   
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Didn't receive code? ",
-                        style: GoogleFonts.poppins(color: Colors.white.withOpacityValue(0.8)),
+                        style: GoogleFonts.domine(color: AppColors.textSecondary),
                       ),
                       TextButton(
                         onPressed: _handleResendOtp,
                         child: Text(
                           'Resend',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          style: GoogleFonts.domine(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),

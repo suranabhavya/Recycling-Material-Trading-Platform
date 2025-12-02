@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -98,7 +97,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
   void _showImageSourceDialog() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.darkGreen,
+      backgroundColor: AppColors.primaryDark,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -109,7 +108,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
           children: [
             Text(
               'Add Photos',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -120,7 +119,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
               leading: const Icon(Icons.camera_alt, color: Colors.white),
               title: Text(
                 'Take Photo',
-                style: GoogleFonts.poppins(color: Colors.white),
+                style: GoogleFonts.domine(color: Colors.white),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -131,7 +130,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
               leading: const Icon(Icons.photo_library, color: Colors.white),
               title: Text(
                 'Choose from Gallery',
-                style: GoogleFonts.poppins(color: Colors.white),
+                style: GoogleFonts.domine(color: Colors.white),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -142,7 +141,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
               leading: const Icon(Icons.photo_library_outlined, color: Colors.white),
               title: Text(
                 'Choose Multiple',
-                style: GoogleFonts.poppins(color: Colors.white),
+                style: GoogleFonts.domine(color: Colors.white),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -247,22 +246,22 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
         children: [
           Text(
             'Add Scrap Material',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 32,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
-          ).animate().fadeIn(duration: 600.ms),
+          ),
 
           const SizedBox(height: 8),
 
           Text(
             'List your recyclable materials',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 16,
               color: Colors.white.withOpacityValue(0.8),
             ),
-          ).animate().fadeIn(duration: 600.ms, delay: 100.ms),
+          ),
 
           // Approval Notice
           if (requiresApproval) ...[
@@ -288,7 +287,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
                   Expanded(
                     child: Text(
                       'This material will require approval from higher levels before being added to inventory.',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 12,
                         color: Colors.white.withOpacityValue(0.9),
                       ),
@@ -296,7 +295,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
                   ),
                 ],
               ),
-            ).animate().fadeIn(duration: 600.ms, delay: 150.ms),
+            ),
           ],
           
           const SizedBox(height: 30),
@@ -398,7 +397,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
                                 borderSide: BorderSide.none,
                               ),
                             ),
-                            dropdownColor: AppColors.darkGreen,
+                            dropdownColor: AppColors.primaryDark,
                             style: const TextStyle(color: Colors.white),
                             items: const [
                               DropdownMenuItem(value: 'KG', child: Text('KG')),
@@ -435,7 +434,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
                     // Image Upload Section
                     Text(
                       'Photos',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -515,14 +514,14 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
                             const SizedBox(height: 8),
                             Text(
                               'Add Photos',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 fontSize: 14,
                                 color: Colors.white.withOpacityValue(0.8),
                               ),
                             ),
                             Text(
                               '${_selectedImages.length} photo(s) selected',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 fontSize: 12,
                                 color: Colors.white.withOpacityValue(0.6),
                               ),
@@ -538,6 +537,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
                       width: double.infinity,
                       height: 56,
                       decoration: BoxDecoration(
+                        color: _isSubmitting ? null : AppColors.primary,
                         gradient: _isSubmitting
                             ? LinearGradient(
                                 colors: [
@@ -545,7 +545,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
                                   Colors.grey.withOpacityValue(0.3),
                                 ],
                               )
-                            : AppColors.primaryGradient,
+                            : null,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: _isSubmitting
                             ? []
@@ -577,7 +577,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
                               )
                             : Text(
                                 requiresApproval ? 'Submit for Approval' : 'Submit Material',
-                                style: GoogleFonts.poppins(
+                                style: GoogleFonts.domine(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -588,7 +588,7 @@ class _AddScrapScreenState extends ConsumerState<AddScrapScreen> {
                 ),
               ),
             ),
-          ).animate().fadeIn(duration: 600.ms, delay: 200.ms).slideY(begin: 0.2, end: 0),
+          ),
         ],
       ),
     );

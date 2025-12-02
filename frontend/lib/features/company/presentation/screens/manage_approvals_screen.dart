@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -61,28 +60,28 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkGreen,
+        backgroundColor: AppColors.primaryDark,
         title: Text(
           'Approve User',
-          style: GoogleFonts.poppins(color: Colors.white),
+          style: GoogleFonts.domine(color: Colors.white),
         ),
         content: Text(
           'Are you sure you want to approve $userName?',
-          style: GoogleFonts.poppins(color: Colors.white70),
+          style: GoogleFonts.domine(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'Cancel',
-              style: GoogleFonts.poppins(color: Colors.white70),
+              style: GoogleFonts.domine(color: Colors.white70),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               'Approve',
-              style: GoogleFonts.poppins(color: AppColors.success),
+              style: GoogleFonts.domine(color: AppColors.success),
             ),
           ),
         ],
@@ -120,28 +119,28 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkGreen,
+        backgroundColor: AppColors.primaryDark,
         title: Text(
           'Reject User',
-          style: GoogleFonts.poppins(color: Colors.white),
+          style: GoogleFonts.domine(color: Colors.white),
         ),
         content: Text(
           'Are you sure you want to reject $userName? This action cannot be undone.',
-          style: GoogleFonts.poppins(color: Colors.white70),
+          style: GoogleFonts.domine(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'Cancel',
-              style: GoogleFonts.poppins(color: Colors.white70),
+              style: GoogleFonts.domine(color: Colors.white70),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               'Reject',
-              style: GoogleFonts.poppins(color: AppColors.error),
+              style: GoogleFonts.domine(color: AppColors.error),
             ),
           ),
         ],
@@ -197,7 +196,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -217,7 +216,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                         children: [
                           Text(
                             'Pending Approvals',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -225,7 +224,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                           ),
                           Text(
                             'Admin Only',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 12,
                               color: Colors.orange,
                               fontWeight: FontWeight.w600,
@@ -253,7 +252,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                             const SizedBox(height: 16),
                             Text(
                               'Loading pending approvals...',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 color: Colors.white.withOpacityValue(0.8),
                               ),
                             ),
@@ -275,7 +274,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                                   const SizedBox(height: 16),
                                   Text(
                                     _error!,
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.domine(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
@@ -293,7 +292,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                                     ),
                                     child: Text(
                                       'Retry',
-                                      style: GoogleFonts.poppins(color: Colors.white),
+                                      style: GoogleFonts.domine(color: Colors.white),
                                     ),
                                   ),
                                 ],
@@ -333,7 +332,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                                         const SizedBox(height: 24),
                                         Text(
                                           'All Caught Up!',
-                                          style: GoogleFonts.poppins(
+                                          style: GoogleFonts.domine(
                                             fontSize: 24,
                                             fontWeight: FontWeight.bold,
                                             color: Colors.white,
@@ -342,7 +341,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                                         const SizedBox(height: 12),
                                         Text(
                                           'No pending approval requests at the moment.',
-                                          style: GoogleFonts.poppins(
+                                          style: GoogleFonts.domine(
                                             fontSize: 16,
                                             color: Colors.white.withOpacityValue(0.8),
                                           ),
@@ -350,13 +349,13 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                                         ),
                                       ],
                                     ),
-                                  ).animate().fadeIn(duration: 600.ms).scale(),
+                                  ),
                                 ),
                               )
                             : RefreshIndicator(
                                 onRefresh: _loadPendingApprovals,
                                 color: AppColors.primary,
-                                backgroundColor: AppColors.darkGreen,
+                                backgroundColor: AppColors.primaryDark,
                                 child: ListView.builder(
                                   padding: const EdgeInsets.all(24),
                                   itemCount: _pendingUsers.length,
@@ -367,10 +366,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                                       name: pendingUser['name'] as String,
                                       email: pendingUser['email'] as String,
                                       createdAt: pendingUser['createdAt'] as String?,
-                                    ).animate().fadeIn(
-                                      duration: 600.ms,
-                                      delay: (100 * index).ms,
-                                    ).slideX(begin: 0.2, end: 0);
+                                    );
                                   },
                                 ),
                               ),
@@ -431,7 +427,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                   children: [
                     Text(
                       name,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -440,7 +436,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                     const SizedBox(height: 4),
                     Text(
                       email,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 14,
                         color: Colors.white.withOpacityValue(0.8),
                       ),
@@ -449,7 +445,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                       const SizedBox(height: 4),
                       Text(
                         'Requested: ${_formatDate(createdAt)}',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 12,
                           color: Colors.white.withOpacityValue(0.6),
                         ),
@@ -469,7 +465,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                   icon: const Icon(Icons.close, size: 20),
                   label: Text(
                     'Reject',
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    style: GoogleFonts.domine(fontWeight: FontWeight.w600),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.error,
@@ -488,7 +484,7 @@ class _ManageApprovalsScreenState extends ConsumerState<ManageApprovalsScreen> {
                   icon: const Icon(Icons.check, size: 20),
                   label: Text(
                     'Approve',
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                    style: GoogleFonts.domine(fontWeight: FontWeight.w600),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.success,

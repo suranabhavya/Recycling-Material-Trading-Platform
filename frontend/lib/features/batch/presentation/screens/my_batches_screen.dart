@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -81,7 +80,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -101,7 +100,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                         children: [
                           Text(
                             'My Batches',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -109,7 +108,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                           ),
                           Text(
                             'Manage your batches',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 12,
                               color: Colors.purple,
                               fontWeight: FontWeight.w600,
@@ -151,7 +150,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                   ),
                   labelColor: Colors.white,
                   unselectedLabelColor: Colors.white.withOpacityValue(0.6),
-                  labelStyle: GoogleFonts.poppins(
+                  labelStyle: GoogleFonts.domine(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -160,7 +159,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                     Tab(text: 'Submitted'),
                   ],
                 ),
-              ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+              ),
 
               const SizedBox(height: 20),
 
@@ -175,7 +174,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                             const SizedBox(height: 16),
                             Text(
                               'Loading batches...',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 color: Colors.white.withOpacityValue(0.8),
                               ),
                             ),
@@ -197,7 +196,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                                   const SizedBox(height: 16),
                                   Text(
                                     _error!,
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.domine(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
@@ -215,7 +214,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                                     ),
                                     child: Text(
                                       'Retry',
-                                      style: GoogleFonts.poppins(color: Colors.white),
+                                      style: GoogleFonts.domine(color: Colors.white),
                                     ),
                                   ),
                                 ],
@@ -253,7 +252,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
               const SizedBox(height: 20),
               Text(
                 'No Draft Batches',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -262,7 +261,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
               const SizedBox(height: 8),
               Text(
                 'Create a new batch to get started',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 14,
                   color: Colors.white.withOpacityValue(0.6),
                 ),
@@ -271,13 +270,13 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
             ],
           ),
         ),
-      ).animate().fadeIn(duration: 600.ms).scale();
+      );
     }
 
     return RefreshIndicator(
       onRefresh: _loadBatches,
       color: AppColors.primary,
-      backgroundColor: AppColors.darkGreen,
+      backgroundColor: AppColors.primaryDark,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: _draftBatches.length,
@@ -305,7 +304,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
               const SizedBox(height: 20),
               Text(
                 'No Submitted Batches',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -314,7 +313,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
               const SizedBox(height: 8),
               Text(
                 'Submit draft batches to send them for admin approval',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 14,
                   color: Colors.white.withOpacityValue(0.6),
                 ),
@@ -323,13 +322,13 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
             ],
           ),
         ),
-      ).animate().fadeIn(duration: 600.ms).scale();
+      );
     }
 
     return RefreshIndicator(
       onRefresh: _loadBatches,
       color: AppColors.primary,
-      backgroundColor: AppColors.darkGreen,
+      backgroundColor: AppColors.primaryDark,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: _submittedBatches.length,
@@ -384,7 +383,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                   children: [
                     Text(
                       batch.name,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -393,7 +392,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                     const SizedBox(height: 4),
                     Text(
                       '${batch.materialCount} materials',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 13,
                         color: Colors.white.withOpacityValue(0.7),
                       ),
@@ -407,7 +406,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
             const SizedBox(height: 12),
             Text(
               batch.description!,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 fontSize: 13,
                 color: Colors.white.withOpacityValue(0.7),
               ),
@@ -423,7 +422,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
               icon: const Icon(Icons.send, color: Colors.white),
               label: Text(
                 'Submit for Approval',
-                style: GoogleFonts.poppins(color: Colors.white),
+                style: GoogleFonts.domine(color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -436,7 +435,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 600.ms, delay: (100 * index).ms).slideX(begin: 0.2, end: 0);
+    );
   }
 
   Widget _buildSubmittedBatchCard(BatchModel batch, int index) {
@@ -500,7 +499,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                   children: [
                     Text(
                       batch.name,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -509,7 +508,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                     const SizedBox(height: 4),
                     Text(
                       '${batch.materialCount} materials',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 13,
                         color: Colors.white.withOpacityValue(0.7),
                       ),
@@ -525,7 +524,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                 ),
                 child: Text(
                   statusText,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -538,7 +537,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
             const SizedBox(height: 12),
             Text(
               batch.description!,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 fontSize: 13,
                 color: Colors.white.withOpacityValue(0.7),
               ),
@@ -558,7 +557,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
                 const SizedBox(width: 6),
                 Text(
                   'Submitted ${_formatDate(batch.submittedAt)}',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 12,
                     color: Colors.white.withOpacityValue(0.6),
                   ),
@@ -568,7 +567,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
           ],
         ],
       ),
-    ).animate().fadeIn(duration: 600.ms, delay: (100 * index).ms).slideX(begin: 0.2, end: 0);
+    );
   }
 
   String _formatDate(DateTime? date) {
@@ -594,25 +593,25 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkGreen,
+        backgroundColor: AppColors.primaryDark,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Submit Batch',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.domine(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
         content: Text(
           'Are you sure you want to submit "${batch.name}" for admin approval? This action cannot be undone.',
-          style: GoogleFonts.poppins(color: Colors.white),
+          style: GoogleFonts.domine(color: Colors.white),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
               'Cancel',
-              style: GoogleFonts.poppins(color: Colors.white),
+              style: GoogleFonts.domine(color: Colors.white),
             ),
           ),
           ElevatedButton(
@@ -622,7 +621,7 @@ class _MyBatchesScreenState extends ConsumerState<MyBatchesScreen> with SingleTi
             ),
             child: Text(
               'Submit',
-              style: GoogleFonts.poppins(color: Colors.white),
+              style: GoogleFonts.domine(color: Colors.white),
             ),
           ),
         ],

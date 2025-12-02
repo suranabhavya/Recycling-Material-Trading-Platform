@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,7 +27,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -48,7 +47,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                         children: [
                           Text(
                             'Material Approvals',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -56,7 +55,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                           ),
                           Text(
                             'Review pending materials',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 12,
                               color: Colors.white.withValues(alpha: 0.7),
                             ),
@@ -89,7 +88,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                             const SizedBox(height: 16),
                             Text(
                               'No Pending Approvals',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -98,13 +97,13 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                             const SizedBox(height: 8),
                             Text(
                               'All materials have been reviewed',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 fontSize: 14,
                                 color: Colors.white.withValues(alpha: 0.7),
                               ),
                             ),
                           ],
-                        ).animate().fadeIn(duration: 600.ms).scale(),
+                        ),
                       );
                     }
 
@@ -113,16 +112,13 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                         ref.invalidate(pendingApprovalsProvider);
                       },
                       color: AppColors.primary,
-                      backgroundColor: AppColors.darkGreen,
+                      backgroundColor: AppColors.primaryDark,
                       child: ListView.builder(
                         padding: const EdgeInsets.all(24),
                         itemCount: materials.length,
                         itemBuilder: (context, index) {
                           final material = materials[index];
-                          return _buildMaterialCard(material, index)
-                              .animate()
-                              .fadeIn(duration: 600.ms, delay: (100 * index).ms)
-                              .slideX(begin: 0.2, end: 0);
+                          return _buildMaterialCard(material, index);
                         },
                       ),
                     );
@@ -135,7 +131,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                         const SizedBox(height: 16),
                         Text(
                           'Loading approvals...',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
@@ -156,7 +152,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                           const SizedBox(height: 16),
                           Text(
                             'Failed to load approvals',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -165,7 +161,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                           const SizedBox(height: 8),
                           Text(
                             error.toString(),
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 14,
                             ),
@@ -183,7 +179,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                             ),
                             child: Text(
                               'Retry',
-                              style: GoogleFonts.poppins(color: Colors.white),
+                              style: GoogleFonts.domine(color: Colors.white),
                             ),
                           ),
                         ],
@@ -254,7 +250,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                     Expanded(
                       child: Text(
                         material.name,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -269,7 +265,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                       ),
                       child: Text(
                         material.statusDisplayName,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
@@ -293,7 +289,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                       const SizedBox(width: 8),
                       Text(
                         'Submitted by: ${material.creator!.name}',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 14,
                           color: Colors.white.withValues(alpha: 0.7),
                         ),
@@ -308,7 +304,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                           ),
                           child: Text(
                             material.creator!.roleTemplate!.name,
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -325,7 +321,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                 if (material.description != null) ...[
                   Text(
                     material.description!,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 14,
                       color: Colors.white.withValues(alpha: 0.8),
                     ),
@@ -353,7 +349,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                           icon: Icons.currency_rupee,
                           label: 'Price',
                           value: '₹${material.price!.toStringAsFixed(2)}',
-                          color: AppColors.accentOrange,
+                          color: AppColors.warning,
                         ),
                       )
                     else
@@ -367,7 +363,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                 if (material.approvalChain != null && material.approvalChain!.isNotEmpty) ...[
                   Text(
                     'Approval History',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -387,7 +383,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                         icon: const Icon(Icons.close, size: 20),
                         label: Text(
                           'Reject',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -408,7 +404,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                         icon: const Icon(Icons.check, size: 20),
                         label: Text(
                           'Approve',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -453,7 +449,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
               const SizedBox(width: 6),
               Text(
                 label,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 11,
                   color: Colors.white.withValues(alpha: 0.7),
                 ),
@@ -463,7 +459,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -511,7 +507,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
               children: [
                 Text(
                   'Level ${entry.level}',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -520,7 +516,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                 if (entry.approverName != null)
                   Text(
                     entry.approverName!,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 11,
                       color: Colors.white.withValues(alpha: 0.7),
                     ),
@@ -528,7 +524,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
                 if (entry.approvedAt != null)
                   Text(
                     _formatDate(entry.approvedAt!),
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 10,
                       color: Colors.white.withValues(alpha: 0.6),
                     ),
@@ -538,7 +534,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
           ),
           Text(
             entry.status,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -582,11 +578,11 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkGreen,
+        backgroundColor: AppColors.primaryDark,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Reject Material',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.domine(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
@@ -596,7 +592,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
           children: [
             Text(
               'Please provide a reason for rejection:',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 color: Colors.white.withValues(alpha: 0.8),
               ),
             ),
@@ -626,7 +622,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
             },
             child: Text(
               'Cancel',
-              style: GoogleFonts.poppins(color: Colors.white),
+              style: GoogleFonts.domine(color: Colors.white),
             ),
           ),
           ElevatedButton(
@@ -652,7 +648,7 @@ class _MaterialApprovalScreenState extends ConsumerState<MaterialApprovalScreen>
             ),
             child: Text(
               'Reject',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+              style: GoogleFonts.domine(fontWeight: FontWeight.w600),
             ),
           ),
         ],

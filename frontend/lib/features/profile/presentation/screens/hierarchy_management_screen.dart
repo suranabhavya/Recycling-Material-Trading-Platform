@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -82,7 +81,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -102,7 +101,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                         children: [
                           Text(
                             'Team Hierarchy',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -110,7 +109,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                           ),
                           Text(
                             'Manage team structure',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 12,
                               color: Colors.orange,
                               fontWeight: FontWeight.w600,
@@ -138,7 +137,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                             const SizedBox(height: 16),
                             Text(
                               'Loading hierarchy...',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 color: Colors.white.withOpacityValue(0.8),
                               ),
                             ),
@@ -160,7 +159,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                                   const SizedBox(height: 16),
                                   Text(
                                     _error!,
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.domine(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
@@ -178,7 +177,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                                     ),
                                     child: Text(
                                       'Retry',
-                                      style: GoogleFonts.poppins(color: Colors.white),
+                                      style: GoogleFonts.domine(color: Colors.white),
                                     ),
                                   ),
                                 ],
@@ -188,7 +187,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                         : RefreshIndicator(
                             onRefresh: _loadHierarchy,
                             color: AppColors.primary,
-                            backgroundColor: AppColors.darkGreen,
+                            backgroundColor: AppColors.primaryDark,
                             child: SingleChildScrollView(
                               physics: const AlwaysScrollableScrollPhysics(),
                               padding: const EdgeInsets.all(24),
@@ -269,7 +268,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
         const SizedBox(width: 12),
         Text(
           title,
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.domine(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -284,7 +283,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
           ),
           child: Text(
             count.toString(),
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 12,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -292,7 +291,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
           ),
         ),
       ],
-    ).animate().fadeIn(duration: 600.ms);
+    );
   }
 
   Widget _buildEmptyState(String message) {
@@ -317,13 +316,13 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
       ),
       child: Text(
         message,
-        style: GoogleFonts.poppins(
+        style: GoogleFonts.domine(
           fontSize: 14,
           color: Colors.white.withOpacityValue(0.6),
         ),
         textAlign: TextAlign.center,
       ),
-    ).animate().fadeIn(duration: 400.ms);
+    );
   }
 
   Widget _buildAdminCard(AdminModel admin, int index) {
@@ -372,7 +371,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                     Flexible(
                       child: Text(
                         admin.name,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -389,7 +388,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                         ),
                         child: Text(
                           'You',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary,
@@ -402,7 +401,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                 const SizedBox(height: 4),
                 Text(
                   admin.email,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 12,
                     color: Colors.white.withOpacityValue(0.7),
                   ),
@@ -412,7 +411,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 600.ms, delay: (100 * index).ms).slideX(begin: -0.2, end: 0);
+    );
   }
 
   Widget _buildLeadCard(LeadModel lead, int index) {
@@ -459,7 +458,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                     children: [
                       Text(
                         lead.name,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -468,7 +467,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                       const SizedBox(height: 4),
                       Text(
                         lead.email,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 12,
                           color: Colors.white.withOpacityValue(0.7),
                         ),
@@ -489,7 +488,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                       const SizedBox(width: 4),
                       Text(
                         '${lead.memberCount}',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -526,7 +525,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                         const SizedBox(width: 8),
                         Text(
                           'Team Members',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: Colors.white.withOpacityValue(0.6),
@@ -543,7 +542,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
             ),
         ],
       ),
-    ).animate().fadeIn(duration: 600.ms, delay: (100 * index).ms).slideX(begin: 0.2, end: 0);
+    );
   }
 
   Widget _buildMemberCard(
@@ -592,7 +591,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                 children: [
                   Text(
                     member.name,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -601,7 +600,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                   const SizedBox(height: 2),
                   Text(
                     member.email,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 11,
                       color: Colors.white.withOpacityValue(0.6),
                     ),
@@ -623,7 +622,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                     const SizedBox(width: 4),
                     Text(
                       'Assign',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -641,7 +640,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
           ],
         ),
       ),
-    ).animate().fadeIn(duration: 400.ms, delay: (50 * index).ms);
+    );
   }
 
   Future<void> _showAssignLeadDialog(TeamMemberModel member) async {
@@ -658,11 +657,11 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
     final selectedLead = await showDialog<LeadModel>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.darkGreen,
+        backgroundColor: AppColors.primaryDark,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           'Assign ${member.name} to Lead',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.domine(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
@@ -674,11 +673,11 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
               leading: const Icon(Icons.stars, color: Colors.purple),
               title: Text(
                 lead.name,
-                style: GoogleFonts.poppins(color: Colors.white),
+                style: GoogleFonts.domine(color: Colors.white),
               ),
               subtitle: Text(
                 '${lead.memberCount} members',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   color: Colors.white.withOpacityValue(0.6),
                   fontSize: 12,
                 ),
@@ -692,7 +691,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               'Cancel',
-              style: GoogleFonts.poppins(color: Colors.white),
+              style: GoogleFonts.domine(color: Colors.white),
             ),
           ),
         ],
@@ -739,8 +738,8 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.darkGreen,
-              AppColors.darkGreen.withOpacityValue(0.9),
+              AppColors.primaryDark,
+              AppColors.primaryDark.withOpacityValue(0.9),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -771,7 +770,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                   children: [
                     Text(
                       member.name,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -779,7 +778,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                     ),
                     Text(
                       member.email,
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 14,
                         color: Colors.white.withOpacityValue(0.7),
                       ),
@@ -792,7 +791,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                 leading: const Icon(Icons.swap_horiz, color: Colors.blue),
                 title: Text(
                   'Reassign to Another Lead',
-                  style: GoogleFonts.poppins(color: Colors.white),
+                  style: GoogleFonts.domine(color: Colors.white),
                 ),
                 onTap: () {
                   Navigator.of(context).pop('reassign');
@@ -802,7 +801,7 @@ class _HierarchyManagementScreenState extends ConsumerState<HierarchyManagementS
                 leading: const Icon(Icons.remove_circle_outline, color: Colors.orange),
                 title: Text(
                   'Unassign from Lead',
-                  style: GoogleFonts.poppins(color: Colors.white),
+                  style: GoogleFonts.domine(color: Colors.white),
                 ),
                 onTap: () {
                   Navigator.of(context).pop('unassign');

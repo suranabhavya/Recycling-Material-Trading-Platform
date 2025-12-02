@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -122,7 +121,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -142,7 +141,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                         children: [
                           Text(
                             'Create Batch',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -150,7 +149,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                           ),
                           Text(
                             'Select materials to batch',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 12,
                               color: Colors.purple,
                               fontWeight: FontWeight.w600,
@@ -174,7 +173,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                             const SizedBox(height: 16),
                             Text(
                               'Loading materials...',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 color: Colors.white.withOpacityValue(0.8),
                               ),
                             ),
@@ -196,7 +195,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                                   const SizedBox(height: 16),
                                   Text(
                                     _error!,
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.domine(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
@@ -214,7 +213,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                                     ),
                                     child: Text(
                                       'Retry',
-                                      style: GoogleFonts.poppins(color: Colors.white),
+                                      style: GoogleFonts.domine(color: Colors.white),
                                     ),
                                   ),
                                 ],
@@ -236,7 +235,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                                       const SizedBox(height: 20),
                                       Text(
                                         'No Materials Available',
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.domine(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -245,7 +244,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                                       const SizedBox(height: 8),
                                       Text(
                                         'Approve some materials first before creating a batch',
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.domine(
                                           fontSize: 14,
                                           color: Colors.white.withOpacityValue(0.6),
                                         ),
@@ -265,12 +264,12 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                                       // Batch Name
                                       Text(
                                         'Batch Information',
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.domine(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),
-                                      ).animate().fadeIn(duration: 600.ms),
+                                      ),
                                       const SizedBox(height: 16),
                                       
                                       TextFormField(
@@ -302,7 +301,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                                           }
                                           return null;
                                         },
-                                      ).animate().fadeIn(duration: 600.ms, delay: 100.ms),
+                                      ),
                                       const SizedBox(height: 16),
                                       
                                       // Description
@@ -327,7 +326,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                                           ),
                                           alignLabelWithHint: true,
                                         ),
-                                      ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                                      ),
                                       
                                       const SizedBox(height: 32),
                                       
@@ -337,7 +336,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                                         children: [
                                           Text(
                                             'Select Materials',
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.domine(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
@@ -354,7 +353,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                                             ),
                                             child: Text(
                                               '${_selectedMaterialIds.length} selected',
-                                              style: GoogleFonts.poppins(
+                                              style: GoogleFonts.domine(
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.white,
@@ -362,7 +361,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                                             ),
                                           ),
                                         ],
-                                      ).animate().fadeIn(duration: 600.ms, delay: 300.ms),
+                                      ),
                                       const SizedBox(height: 16),
                                       
                                       // Materials List
@@ -388,7 +387,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.darkGreen.withOpacityValue(0.9),
+                    color: AppColors.primaryDark.withOpacityValue(0.9),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacityValue(0.2),
@@ -422,7 +421,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                               )
                             : Text(
                                 'Create Batch',
-                                style: GoogleFonts.poppins(
+                                style: GoogleFonts.domine(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -525,7 +524,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                 children: [
                   Text(
                     material.name,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -542,7 +541,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                       const SizedBox(width: 4),
                       Text(
                         '${material.quantity} ${material.unit}',
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 12,
                           color: Colors.white.withOpacityValue(0.8),
                         ),
@@ -557,7 +556,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                         const SizedBox(width: 4),
                         Text(
                           '${material.price}',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 12,
                             color: Colors.white.withOpacityValue(0.8),
                           ),
@@ -569,7 +568,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
                     const SizedBox(height: 4),
                     Text(
                       'By ${material.creator!.name}',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 11,
                         color: Colors.white.withOpacityValue(0.6),
                       ),
@@ -581,7 +580,7 @@ class _CreateBatchScreenState extends ConsumerState<CreateBatchScreen> {
           ],
         ),
       ),
-    ).animate().fadeIn(duration: 600.ms, delay: (100 * index).ms).slideX(begin: 0.2, end: 0);
+    );
   }
 }
 

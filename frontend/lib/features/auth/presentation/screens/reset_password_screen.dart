@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -66,7 +65,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -84,20 +83,18 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 
                 Text(
                   'Reset Password',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
-                )
-                    .animate()
-                    .fadeIn(duration: 600.ms),
+                ),
                 
                 const SizedBox(height: 10),
                 
                 Text(
                   'Enter OTP and new password',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 14,
                     color: Colors.white.withOpacityValue(0.8),
                   ),
@@ -191,7 +188,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           width: double.infinity,
                           height: 56,
                           decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -221,7 +218,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                                   )
                                 : Text(
                                     'Reset Password',
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.domine(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w600,
                                     ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -55,7 +54,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -71,7 +70,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
                     const SizedBox(width: 8),
                     Text(
                       'Personal Settings',
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.domine(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -90,7 +89,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
                     children: [
                       // Profile Information Section
                       _buildSectionTitle('Profile Information')
-                          .animate().fadeIn(duration: 600.ms),
+                          ,
                       
                       const SizedBox(height: 16),
                       
@@ -183,7 +182,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
                                           ),
                                           child: Text(
                                             'Cancel',
-                                            style: GoogleFonts.poppins(color: Colors.white),
+                                            style: GoogleFonts.domine(color: Colors.white),
                                           ),
                                         ),
                                       ),
@@ -211,7 +210,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
                                           ),
                                           child: Text(
                                             'Save Changes',
-                                            style: GoogleFonts.poppins(color: Colors.white),
+                                            style: GoogleFonts.domine(color: Colors.white),
                                           ),
                                         ),
                                       ),
@@ -225,7 +224,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
                                       icon: const Icon(Icons.edit, color: Colors.white),
                                       label: Text(
                                         'Edit Profile',
-                                        style: GoogleFonts.poppins(color: Colors.white),
+                                        style: GoogleFonts.domine(color: Colors.white),
                                       ),
                                       style: ElevatedButton.styleFrom(
                                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -240,13 +239,13 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
                             ),
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 100.ms).slideY(begin: 0.2, end: 0),
+                      ),
                       
                       const SizedBox(height: 30),
                       
                       // Change Password Section
                       _buildSectionTitle('Change Password')
-                          .animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                          ,
                       
                       const SizedBox(height: 16),
                       
@@ -371,7 +370,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
                                         ),
                                         child: Text(
                                           'Cancel',
-                                          style: GoogleFonts.poppins(color: Colors.white),
+                                          style: GoogleFonts.domine(color: Colors.white),
                                         ),
                                       ),
                                     ),
@@ -406,7 +405,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
                                         ),
                                         child: Text(
                                           'Change Password',
-                                          style: GoogleFonts.poppins(color: Colors.white),
+                                          style: GoogleFonts.domine(color: Colors.white),
                                         ),
                                       ),
                                     ),
@@ -420,7 +419,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
                                     icon: const Icon(Icons.vpn_key, color: Colors.white),
                                     label: Text(
                                       'Change Password',
-                                      style: GoogleFonts.poppins(color: Colors.white),
+                                      style: GoogleFonts.domine(color: Colors.white),
                                     ),
                                     style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -434,7 +433,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
                             ],
                           ),
                         ),
-                      ).animate().fadeIn(duration: 600.ms, delay: 300.ms).slideY(begin: 0.2, end: 0),
+                      ),
                     ],
                   ),
                 ),
@@ -449,7 +448,7 @@ class _PersonalSettingsScreenState extends ConsumerState<PersonalSettingsScreen>
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: GoogleFonts.poppins(
+      style: GoogleFonts.domine(
         fontSize: 18,
         fontWeight: FontWeight.bold,
         color: Colors.white,

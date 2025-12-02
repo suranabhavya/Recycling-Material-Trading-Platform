@@ -15,10 +15,19 @@ export class MaterialService {
   async create(userId: string, createMaterialDto: CreateMaterialDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { company: true, roleTemplate: true },
+      include: {
+        company: {
+          include: {
+            roleTemplates: {
+              orderBy: { level: 'asc' },
+            },
+          },
+        },
+        roleTemplate: true
+      },
     });
 
-    if (!user || !user.companyId) {
+    if (!user || !user.companyId || !user.company) {
       throw new ForbiddenException('You must be part of a company to create materials');
     }
 
@@ -26,20 +35,34 @@ export class MaterialService {
       throw new ForbiddenException('Your company membership must be approved first');
     }
 
-    const initialApprovalLevel = await this.approvalService.getInitialApprovalLevel(userId);
+    if (!user.roleTemplate) {
+      throw new ForbiddenException('You must have a role assigned to create materials');
+    }
 
-    const status = initialApprovalLevel === null
+    // Calculate required approval levels (snapshot)
+    const requiredLevels: number[] = [];
+    for (const role of user.company.roleTemplates) {
+      if (role.level < user.roleTemplate.level && role.requiresApproval) {
+        requiredLevels.push(role.level);
+      }
+    }
+
+    const status = requiredLevels.length === 0
       ? MaterialStatus.APPROVED
       : MaterialStatus.PENDING;
+
+    const currentApprovalLevel = requiredLevels.length > 0 ? requiredLevels[0] : null;
 
     return this.prisma.material.create({
       data: {
         ...createMaterialDto,
         creatorId: userId,
         companyId: user.companyId,
+        creatorManagerId: user.managerId,
+        creatorOrgUnitId: user.orgUnitId,
+        requiredApprovalLevels: requiredLevels,
         status,
-        currentApprovalLevel: initialApprovalLevel,
-        approvalChain: [],
+        currentApprovalLevel: currentApprovalLevel,
       },
       include: {
         creator: {
@@ -59,6 +82,20 @@ export class MaterialService {
           select: {
             id: true,
             name: true,
+          },
+        },
+        approvalHistory: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            approvedAt: 'desc',
           },
         },
       },
@@ -156,6 +193,20 @@ export class MaterialService {
           select: {
             id: true,
             name: true,
+          },
+        },
+        approvalHistory: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            approvedAt: 'desc',
           },
         },
       },

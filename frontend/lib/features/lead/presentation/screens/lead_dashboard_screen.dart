@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -82,7 +81,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(gradient: AppColors.backgroundGradient),
+        decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
           child: Column(
             children: [
@@ -102,7 +101,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                         children: [
                           Text(
                             'Lead Dashboard',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -110,7 +109,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                           ),
                           Text(
                             'Manage team materials',
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.domine(
                               fontSize: 12,
                               color: Colors.purple,
                               fontWeight: FontWeight.w600,
@@ -171,7 +170,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                         ),
                       ),
                     ],
-                  ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
+                  ),
                 ),
 
               const SizedBox(height: 20),
@@ -191,7 +190,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                   ),
                   labelColor: Colors.white,
                   unselectedLabelColor: Colors.white.withOpacityValue(0.6),
-                  labelStyle: GoogleFonts.poppins(
+                  labelStyle: GoogleFonts.domine(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -200,7 +199,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                     Tab(text: 'Approved'),
                   ],
                 ),
-              ).animate().fadeIn(duration: 600.ms, delay: 300.ms),
+              ),
 
               const SizedBox(height: 20),
 
@@ -215,7 +214,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                             const SizedBox(height: 16),
                             Text(
                               'Loading materials...',
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.domine(
                                 color: Colors.white.withOpacityValue(0.8),
                               ),
                             ),
@@ -237,7 +236,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                                   const SizedBox(height: 16),
                                   Text(
                                     _error!,
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.domine(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
@@ -255,7 +254,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                                     ),
                                     child: Text(
                                       'Retry',
-                                      style: GoogleFonts.poppins(color: Colors.white),
+                                      style: GoogleFonts.domine(color: Colors.white),
                                     ),
                                   ),
                                 ],
@@ -301,7 +300,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
           const SizedBox(height: 8),
           Text(
             count.toString(),
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -309,7 +308,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
           ),
           Text(
             label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 12,
               color: Colors.white.withOpacityValue(0.8),
             ),
@@ -335,7 +334,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
               const SizedBox(height: 20),
               Text(
                 'No Pending Materials',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -344,7 +343,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
               const SizedBox(height: 8),
               Text(
                 'All materials from your team have been reviewed',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 14,
                   color: Colors.white.withOpacityValue(0.6),
                 ),
@@ -353,13 +352,13 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
             ],
           ),
         ),
-      ).animate().fadeIn(duration: 600.ms).scale();
+      );
     }
 
     return RefreshIndicator(
       onRefresh: _loadData,
       color: AppColors.primary,
-      backgroundColor: AppColors.darkGreen,
+      backgroundColor: AppColors.primaryDark,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         itemCount: _pendingMaterials.length,
@@ -387,7 +386,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
               const SizedBox(height: 20),
               Text(
                 'No Approved Materials',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -396,7 +395,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
               const SizedBox(height: 8),
               Text(
                 'Approved materials will appear here ready for batching',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 14,
                   color: Colors.white.withOpacityValue(0.6),
                 ),
@@ -405,13 +404,13 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
             ],
           ),
         ),
-      ).animate().fadeIn(duration: 600.ms).scale();
+      );
     }
 
     return RefreshIndicator(
       onRefresh: _loadData,
       color: AppColors.primary,
-      backgroundColor: AppColors.darkGreen,
+      backgroundColor: AppColors.primaryDark,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         itemCount: _approvedMaterials.length,
@@ -470,7 +469,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                     children: [
                       Text(
                         material.name,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -480,7 +479,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                       if (material.creator != null)
                         Text(
                           'By ${material.creator!.name}',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 12,
                             color: Colors.white.withOpacityValue(0.7),
                           ),
@@ -499,7 +498,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                   ),
                   child: Text(
                     isPending ? 'PENDING' : 'APPROVED',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -520,7 +519,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                 const SizedBox(width: 6),
                 Text(
                   '${material.quantity} ${material.unit}',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 14,
                     color: Colors.white.withOpacityValue(0.9),
                   ),
@@ -535,7 +534,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                   const SizedBox(width: 6),
                   Text(
                     '${material.price}',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 14,
                       color: Colors.white.withOpacityValue(0.9),
                     ),
@@ -547,7 +546,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
               const SizedBox(height: 8),
               Text(
                 material.description!,
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 12,
                   color: Colors.white.withOpacityValue(0.6),
                 ),
@@ -567,7 +566,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                   const SizedBox(width: 6),
                   Text(
                     '${material.images.length} image(s)',
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 12,
                       color: Colors.white.withOpacityValue(0.7),
                     ),
@@ -578,7 +577,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
           ],
         ),
       ),
-    ).animate().fadeIn(duration: 600.ms, delay: (100 * index).ms).slideX(begin: 0.2, end: 0);
+    );
   }
 
   Future<void> _showMaterialDetails(MaterialModel material, bool isPending) async {
@@ -593,8 +592,8 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.darkGreen,
-              AppColors.darkGreen.withOpacityValue(0.9),
+              AppColors.primaryDark,
+              AppColors.primaryDark.withOpacityValue(0.9),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -626,7 +625,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                     children: [
                       Text(
                         material.name,
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.domine(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -636,7 +635,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                       if (material.creator != null)
                         Text(
                           'Submitted by ${material.creator!.name}',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 14,
                             color: Colors.white.withOpacityValue(0.7),
                           ),
@@ -651,7 +650,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                         const SizedBox(height: 16),
                         Text(
                           'Images',
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.domine(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Colors.white.withOpacityValue(0.8),
@@ -695,7 +694,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                           icon: const Icon(Icons.close, color: Colors.white),
                           label: Text(
                             'Reject',
-                            style: GoogleFonts.poppins(color: Colors.white),
+                            style: GoogleFonts.domine(color: Colors.white),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
@@ -713,7 +712,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
                           icon: const Icon(Icons.check, color: Colors.white),
                           label: Text(
                             'Approve',
-                            style: GoogleFonts.poppins(color: Colors.white),
+                            style: GoogleFonts.domine(color: Colors.white),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
@@ -748,7 +747,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
         children: [
           Text(
             label,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: Colors.white.withOpacityValue(0.6),
@@ -757,7 +756,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 14,
               color: Colors.white,
             ),
@@ -804,7 +803,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
       builder: (context) => AlertDialog(
         title: Text(
           'Reject Material',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          style: GoogleFonts.domine(fontWeight: FontWeight.bold),
         ),
         content: TextField(
           controller: reasonController,
@@ -817,7 +816,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel', style: GoogleFonts.poppins()),
+            child: Text('Cancel', style: GoogleFonts.domine()),
           ),
           ElevatedButton(
             onPressed: () {
@@ -837,7 +836,7 @@ class _LeadDashboardScreenState extends ConsumerState<LeadDashboardScreen> with 
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
             ),
-            child: Text('Reject', style: GoogleFonts.poppins()),
+            child: Text('Reject', style: GoogleFonts.domine()),
           ),
         ],
       ),

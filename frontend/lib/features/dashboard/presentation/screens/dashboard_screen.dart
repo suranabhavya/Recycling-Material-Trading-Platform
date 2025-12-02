@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -22,22 +21,22 @@ class DashboardScreen extends ConsumerWidget {
         children: [
           Text(
             'Dashboard',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 32,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
-          ).animate().fadeIn(duration: 600.ms),
+          ),
           
           const SizedBox(height: 8),
           
           Text(
             'Welcome back, ${user?.name ?? "User"}!',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 16,
               color: Colors.white.withOpacityValue(0.8),
             ),
-          ).animate().fadeIn(duration: 600.ms, delay: 100.ms),
+          ),
           
           const SizedBox(height: 30),
           
@@ -62,7 +61,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               ),
             ],
-          ).animate().fadeIn(duration: 600.ms, delay: 200.ms).slideY(begin: 0.2, end: 0),
+          ),
           
           const SizedBox(height: 16),
           
@@ -82,11 +81,11 @@ class DashboardScreen extends ConsumerWidget {
                   icon: Icons.attach_money_rounded,
                   title: 'Total Value',
                   value: '₹0',
-                  color: AppColors.accentOrange,
+                  color: AppColors.warning,
                 ),
               ),
             ],
-          ).animate().fadeIn(duration: 600.ms, delay: 300.ms).slideY(begin: 0.2, end: 0),
+          ),
           
           const SizedBox(height: 30),
           
@@ -94,12 +93,12 @@ class DashboardScreen extends ConsumerWidget {
           if (user?.roleTemplate != null && user!.roleTemplate!.level <= 3) ...[
             Text(
               'Quick Actions',
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
-            ).animate().fadeIn(duration: 600.ms, delay: 400.ms),
+            ),
 
             const SizedBox(height: 16),
 
@@ -111,7 +110,7 @@ class DashboardScreen extends ConsumerWidget {
               subtitle: 'Review pending materials',
               color: Colors.orange,
               onTap: () => context.push('/material-approvals'),
-            ).animate().fadeIn(duration: 600.ms, delay: 450.ms).slideX(begin: -0.2, end: 0),
+            ),
 
             const SizedBox(height: 30),
           ],
@@ -119,12 +118,12 @@ class DashboardScreen extends ConsumerWidget {
           // Recent Activity
           Text(
             'Recent Activity',
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
-          ).animate().fadeIn(duration: 600.ms, delay: 500.ms),
+          ),
           
           const SizedBox(height: 16),
           
@@ -156,7 +155,7 @@ class DashboardScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Text(
                   'No activity yet',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.white.withOpacityValue(0.8),
@@ -165,7 +164,7 @@ class DashboardScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   'Start adding scrap materials to see activity',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 14,
                     color: Colors.white.withOpacityValue(0.6),
                   ),
@@ -173,7 +172,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ).animate().fadeIn(duration: 600.ms, delay: 600.ms).slideY(begin: 0.2, end: 0),
+          ),
         ],
       ),
     );
@@ -216,7 +215,7 @@ class DashboardScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           Text(
             title,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 12,
               color: Colors.white.withOpacityValue(0.8),
             ),
@@ -224,7 +223,7 @@ class DashboardScreen extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.poppins(
+            style: GoogleFonts.domine(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -280,7 +279,7 @@ class DashboardScreen extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -289,7 +288,7 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.domine(
                       fontSize: 13,
                       color: Colors.white.withOpacityValue(0.7),
                     ),

@@ -75,7 +75,7 @@ class _HierarchySetupWidgetState extends State<HierarchySetupWidget> {
       children: [
         Text(
           'Hierarchy Configuration',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.domine(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -96,7 +96,7 @@ class _HierarchySetupWidgetState extends State<HierarchySetupWidget> {
             children: [
               Text(
                 'Hierarchy Mode',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: Colors.white.withValues(alpha: 0.9),
@@ -123,7 +123,7 @@ class _HierarchySetupWidgetState extends State<HierarchySetupWidget> {
         // Roles List
         Text(
           'Define Roles & Approval Flow',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.domine(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.white.withValues(alpha: 0.9),
@@ -132,7 +132,7 @@ class _HierarchySetupWidgetState extends State<HierarchySetupWidget> {
         const SizedBox(height: 4),
         Text(
           'Level 1 is the highest authority. Lower levels may require approval from higher levels.',
-          style: GoogleFonts.poppins(
+          style: GoogleFonts.domine(
             fontSize: 12,
             color: Colors.white.withValues(alpha: 0.7),
           ),
@@ -158,7 +158,7 @@ class _HierarchySetupWidgetState extends State<HierarchySetupWidget> {
           icon: const Icon(Icons.add, color: Colors.white),
           label: Text(
             'Add Role Level',
-            style: GoogleFonts.poppins(color: Colors.white),
+            style: GoogleFonts.domine(color: Colors.white),
           ),
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: Colors.white),
@@ -197,7 +197,7 @@ class _HierarchySetupWidgetState extends State<HierarchySetupWidget> {
           children: [
             Text(
               title,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
@@ -206,7 +206,7 @@ class _HierarchySetupWidgetState extends State<HierarchySetupWidget> {
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.domine(
                 fontSize: 11,
                 color: Colors.white.withValues(alpha: 0.7),
               ),
@@ -288,7 +288,7 @@ class _RoleCardState extends State<_RoleCard> {
                 ),
                 child: Text(
                   'Level ${widget.role.level}',
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.domine(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -310,10 +310,10 @@ class _RoleCardState extends State<_RoleCard> {
           TextFormField(
             controller: _nameController,
             enabled: !widget.isAdmin,
-            style: GoogleFonts.poppins(color: Colors.white),
+            style: GoogleFonts.domine(color: Colors.white),
             decoration: InputDecoration(
               labelText: 'Role Name',
-              labelStyle: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.7)),
+              labelStyle: GoogleFonts.domine(color: Colors.white.withValues(alpha: 0.7)),
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.05),
               border: OutlineInputBorder(
@@ -336,11 +336,11 @@ class _RoleCardState extends State<_RoleCard> {
 
           TextFormField(
             controller: _descriptionController,
-            style: GoogleFonts.poppins(color: Colors.white),
+            style: GoogleFonts.domine(color: Colors.white),
             maxLines: 2,
             decoration: InputDecoration(
               labelText: 'Description (optional)',
-              labelStyle: GoogleFonts.poppins(color: Colors.white.withValues(alpha: 0.7)),
+              labelStyle: GoogleFonts.domine(color: Colors.white.withValues(alpha: 0.7)),
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.05),
               border: OutlineInputBorder(
@@ -364,14 +364,14 @@ class _RoleCardState extends State<_RoleCard> {
             CheckboxListTile(
               title: Text(
                 'Requires Approval',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 14,
                   color: Colors.white,
                 ),
               ),
               subtitle: Text(
                 'Materials created by this role need approval from higher levels',
-                style: GoogleFonts.poppins(
+                style: GoogleFonts.domine(
                   fontSize: 11,
                   color: Colors.white.withValues(alpha: 0.7),
                 ),
