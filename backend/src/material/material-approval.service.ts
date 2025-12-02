@@ -1,85 +1,61 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { MaterialStatus } from '@prisma/client';
+import { MaterialStatus, ApprovalStatus } from '@prisma/client';
 
 @Injectable()
 export class MaterialApprovalService {
   constructor(private prisma: PrismaService) {}
 
-  async getInitialApprovalLevel(creatorId: string): Promise<number | null> {
-    const creator = await this.prisma.user.findUnique({
-      where: { id: creatorId },
-      include: {
-        roleTemplate: true,
-        company: {
-          include: {
-            roleTemplates: {
-              orderBy: { level: 'asc' },
-            },
-          },
-        },
-      },
+  /**
+   * Recursively get all subordinate IDs for SIMPLE hierarchy mode
+   */
+  private async getAllSubordinateIds(userId: string): Promise<string[]> {
+    const subordinates = await this.prisma.user.findMany({
+      where: { managerId: userId },
+      select: { id: true },
     });
 
-    if (!creator || !creator.roleTemplate || !creator.company) {
-      throw new NotFoundException('User or role template not found');
+    const subordinateIds = subordinates.map(s => s.id);
+
+    // Recursively get subordinates of subordinates
+    for (const subordinate of subordinates) {
+      const nestedIds = await this.getAllSubordinateIds(subordinate.id);
+      subordinateIds.push(...nestedIds);
     }
 
-    const creatorLevel = creator.roleTemplate.level;
-
-    for (const role of creator.company.roleTemplates) {
-      if (role.level < creatorLevel && role.requiresApproval) {
-        return role.level;
-      }
-    }
-
-    return null;
+    return subordinateIds;
   }
 
-  async getApprovalChainLevels(creatorId: string): Promise<number[]> {
-    const creator = await this.prisma.user.findUnique({
-      where: { id: creatorId },
-      include: {
-        roleTemplate: true,
-        company: {
-          include: {
-            roleTemplates: {
-              orderBy: { level: 'asc' },
-            },
-          },
-        },
-      },
+  /**
+   * Recursively get all managed org unit IDs for ADVANCED hierarchy mode
+   */
+  private async getManagedOrgUnitIds(orgUnitId: string): Promise<string[]> {
+    const orgUnit = await this.prisma.organizationalUnit.findUnique({
+      where: { id: orgUnitId },
+      include: { children: true },
     });
 
-    if (!creator || !creator.roleTemplate || !creator.company) {
+    if (!orgUnit) {
       return [];
     }
 
-    const approvalLevels: number[] = [];
-    const creatorLevel = creator.roleTemplate.level;
+    const orgUnitIds = [orgUnitId];
 
-    for (const role of creator.company.roleTemplates) {
-      if (role.level < creatorLevel && role.requiresApproval) {
-        approvalLevels.push(role.level);
-      }
+    // Recursively get child org units
+    for (const child of orgUnit.children) {
+      const nestedIds = await this.getManagedOrgUnitIds(child.id);
+      orgUnitIds.push(...nestedIds);
     }
 
-    return approvalLevels;
+    return orgUnitIds;
   }
 
   async approveMaterial(materialId: string, approverId: string) {
     const material = await this.prisma.material.findUnique({
       where: { id: materialId },
       include: {
-        creator: {
-          include: { roleTemplate: true },
-        },
-        company: {
-          include: {
-            roleTemplates: {
-              orderBy: { level: 'asc' },
-            },
-          },
+        approvalHistory: {
+          orderBy: { approvedAt: 'desc' },
         },
       },
     });
@@ -105,29 +81,38 @@ export class MaterialApprovalService {
       throw new ForbiddenException('You are not authorized to approve this material at this level');
     }
 
-    const approvalChain = Array.isArray(material.approvalChain)
-      ? material.approvalChain
-      : [];
+    // Calculate time taken from last action or material creation
+    const lastAction = material.approvalHistory.length > 0
+      ? material.approvalHistory[0]
+      : null;
 
-    approvalChain.push({
-      level: approver.roleTemplate.level,
-      userId: approverId,
-      userName: approver.name,
-      action: 'approved',
-      timestamp: new Date().toISOString(),
+    const timeTakenMs = lastAction
+      ? Date.now() - lastAction.approvedAt.getTime()
+      : Date.now() - material.createdAt.getTime();
+
+    // Find next level from frozen requiredApprovalLevels chain
+    const currentIndex = material.requiredApprovalLevels.indexOf(material.currentApprovalLevel!);
+    const nextLevel = currentIndex >= 0 && currentIndex < material.requiredApprovalLevels.length - 1
+      ? material.requiredApprovalLevels[currentIndex + 1]
+      : null;
+
+    // Create approval history entry
+    await this.prisma.approvalHistory.create({
+      data: {
+        materialId,
+        level: approver.roleTemplate.level,
+        userId: approverId,
+        action: ApprovalStatus.APPROVED,
+        timeTakenMs,
+      },
     });
 
-    const nextLevel = await this.getNextApprovalLevel(
-      material.creatorId,
-      approver.roleTemplate.level,
-    );
-
+    // Update material
     const updatedMaterial = await this.prisma.material.update({
       where: { id: materialId },
       data: {
         currentApprovalLevel: nextLevel,
         status: nextLevel === null ? MaterialStatus.APPROVED : MaterialStatus.PENDING,
-        approvalChain: approvalChain,
         lastApproverId: approverId,
         lastApprovedAt: new Date(),
       },
@@ -146,6 +131,20 @@ export class MaterialApprovalService {
             email: true,
           },
         },
+        approvalHistory: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            approvedAt: 'desc',
+          },
+        },
       },
     });
 
@@ -155,6 +154,11 @@ export class MaterialApprovalService {
   async rejectMaterial(materialId: string, approverId: string, reason: string) {
     const material = await this.prisma.material.findUnique({
       where: { id: materialId },
+      include: {
+        approvalHistory: {
+          orderBy: { approvedAt: 'desc' },
+        },
+      },
     });
 
     if (!material) {
@@ -178,25 +182,33 @@ export class MaterialApprovalService {
       throw new ForbiddenException('You are not authorized to reject this material at this level');
     }
 
-    const approvalChain = Array.isArray(material.approvalChain)
-      ? material.approvalChain
-      : [];
+    // Calculate time taken from last action or material creation
+    const lastAction = material.approvalHistory.length > 0
+      ? material.approvalHistory[0]
+      : null;
 
-    approvalChain.push({
-      level: approver.roleTemplate.level,
-      userId: approverId,
-      userName: approver.name,
-      action: 'rejected',
-      timestamp: new Date().toISOString(),
-      reason,
+    const timeTakenMs = lastAction
+      ? Date.now() - lastAction.approvedAt.getTime()
+      : Date.now() - material.createdAt.getTime();
+
+    // Create rejection history entry
+    await this.prisma.approvalHistory.create({
+      data: {
+        materialId,
+        level: approver.roleTemplate.level,
+        userId: approverId,
+        action: ApprovalStatus.REJECTED,
+        comments: reason,
+        timeTakenMs,
+      },
     });
 
+    // Update material
     const updatedMaterial = await this.prisma.material.update({
       where: { id: materialId },
       data: {
         status: MaterialStatus.REJECTED,
         currentApprovalLevel: null,
-        approvalChain: approvalChain,
         rejectionReason: reason,
         lastApproverId: approverId,
         lastApprovedAt: new Date(),
@@ -216,6 +228,20 @@ export class MaterialApprovalService {
             email: true,
           },
         },
+        approvalHistory: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            approvedAt: 'desc',
+          },
+        },
       },
     });
 
@@ -225,19 +251,49 @@ export class MaterialApprovalService {
   async getPendingApprovals(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { roleTemplate: true },
+      include: {
+        roleTemplate: true,
+        company: true,
+      },
     });
 
-    if (!user || !user.roleTemplate || !user.companyId) {
+    if (!user || !user.roleTemplate || !user.companyId || !user.company) {
       throw new NotFoundException('User or role not found');
     }
 
+    // Build hierarchy-aware filter based on company mode
+    // For SIMPLE mode: Show materials from subordinates in the hierarchy
+    // For ADVANCED mode: Show materials from managed org units
+    let whereConditions: any = {
+      companyId: user.companyId,
+      currentApprovalLevel: user.roleTemplate.level,
+      status: MaterialStatus.PENDING,
+    };
+
+    if (user.company.hierarchyMode === 'SIMPLE') {
+      // Get all subordinates (people who report to this user, directly or indirectly)
+      const subordinateIds = await this.getAllSubordinateIds(userId);
+
+      if (subordinateIds.length > 0) {
+        // Show materials where creator is a subordinate
+        whereConditions.creatorId = { in: subordinateIds };
+      } else {
+        // If no subordinates, don't show any materials in SIMPLE mode
+        // (unless they're direct reports, which we check via managerId)
+        whereConditions.creator = { managerId: userId };
+      }
+    } else if (user.company.hierarchyMode === 'ADVANCED' && user.orgUnitId) {
+      // Get all managed org units (this unit and all child units)
+      const managedOrgUnitIds = await this.getManagedOrgUnitIds(user.orgUnitId);
+
+      if (managedOrgUnitIds.length > 0) {
+        // Show materials from creators in managed org units
+        whereConditions.creatorOrgUnitId = { in: managedOrgUnitIds };
+      }
+    }
+
     return this.prisma.material.findMany({
-      where: {
-        companyId: user.companyId,
-        currentApprovalLevel: user.roleTemplate.level,
-        status: MaterialStatus.PENDING,
-      },
+      where: whereConditions,
       include: {
         creator: {
           select: {
@@ -250,6 +306,20 @@ export class MaterialApprovalService {
                 level: true,
               },
             },
+          },
+        },
+        approvalHistory: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+          orderBy: {
+            approvedAt: 'desc',
           },
         },
       },
@@ -282,34 +352,5 @@ export class MaterialApprovalService {
     }
 
     return material.currentApprovalLevel === user.roleTemplate.level;
-  }
-
-  private async getNextApprovalLevel(
-    creatorId: string,
-    currentLevel: number,
-  ): Promise<number | null> {
-    const creator = await this.prisma.user.findUnique({
-      where: { id: creatorId },
-      include: {
-        company: {
-          include: {
-            roleTemplates: {
-              where: {
-                level: { lt: currentLevel },
-                requiresApproval: true,
-              },
-              orderBy: { level: 'desc' },
-              take: 1,
-            },
-          },
-        },
-      },
-    });
-
-    if (!creator || !creator.company || creator.company.roleTemplates.length === 0) {
-      return null;
-    }
-
-    return creator.company.roleTemplates[0].level;
   }
 }
