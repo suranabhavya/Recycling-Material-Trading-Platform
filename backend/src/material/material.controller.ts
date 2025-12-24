@@ -2,82 +2,54 @@ import {
   Controller,
   Get,
   Post,
-  Body,
-  Patch,
-  Param,
   Delete,
+  Body,
+  Param,
   UseGuards,
   Request,
+  Put,
 } from '@nestjs/common';
 import { MaterialService } from './material.service';
-import { MaterialApprovalService } from './material-approval.service';
 import { CreateMaterialDto } from './dto/create-material.dto';
-import { UpdateMaterialDto } from './dto/update-material.dto';
+import { ApproveMaterialDto } from './dto/approve-material.dto';
 import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
 
 @Controller('materials')
 @UseGuards(JwtAuthGuard)
 export class MaterialController {
-  constructor(
-    private readonly materialService: MaterialService,
-    private readonly approvalService: MaterialApprovalService,
-  ) {}
+  constructor(private readonly materialService: MaterialService) {}
 
   @Post()
-  create(@Request() req, @Body() createMaterialDto: CreateMaterialDto) {
-    return this.materialService.create(req.user.id, createMaterialDto);
+  create(@Body() createMaterialDto: CreateMaterialDto, @Request() req) {
+    return this.materialService.create(createMaterialDto, req.user.userId);
   }
 
-  @Get()
-  findAll(@Request() req) {
-    return this.materialService.findAll(req.user.id);
-  }
-
-  @Get('my-materials')
-  getMyMaterials(@Request() req) {
-    return this.materialService.findMyMaterials(req.user.id);
+  @Get('company/:companyId')
+  findAll(@Param('companyId') companyId: string, @Request() req) {
+    return this.materialService.findAll(companyId, req.user.userId);
   }
 
   @Get('pending-approvals')
-  getPendingApprovals(@Request() req) {
-    return this.approvalService.getPendingApprovals(req.user.id);
-  }
-
-  @Get('inventory')
-  getInventory(@Request() req) {
-    return this.materialService.getInventory(req.user.id);
+  getPendingApprovalsForUser(@Request() req) {
+    return this.materialService.getPendingApprovalsForUser(req.user.userId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Request() req) {
-    return this.materialService.findOne(id, req.user.id);
+  findOne(@Param('id') id: string) {
+    return this.materialService.findOne(id);
   }
 
-  @Patch(':id')
-  update(
+  @Put(':id/approve')
+  approveMaterial(
     @Param('id') id: string,
+    @Body() dto: ApproveMaterialDto,
     @Request() req,
-    @Body() updateMaterialDto: UpdateMaterialDto,
   ) {
-    return this.materialService.update(id, req.user.id, updateMaterialDto);
+    return this.materialService.approveMaterial(id, req.user.userId, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Request() req) {
-    return this.materialService.remove(id, req.user.id);
-  }
-
-  @Post(':id/approve')
-  approveMaterial(@Param('id') id: string, @Request() req) {
-    return this.approvalService.approveMaterial(id, req.user.id);
-  }
-
-  @Post(':id/reject')
-  rejectMaterial(
-    @Param('id') id: string,
-    @Request() req,
-    @Body() body: { reason: string },
-  ) {
-    return this.approvalService.rejectMaterial(id, req.user.id, body.reason);
+  delete(@Param('id') id: string, @Request() req) {
+    return this.materialService.delete(id, req.user.userId);
   }
 }

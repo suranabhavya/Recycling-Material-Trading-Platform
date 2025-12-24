@@ -1,12 +1,11 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { MaterialStatus } from '@prisma/client';
+import { ApprovalAction } from '@prisma/client';
 
 export class ApproveMaterialDto {
-  @IsEnum(MaterialStatus)
-  status: MaterialStatus;
+  @IsEnum(ApprovalAction)
+  action: ApprovalAction;
 
   @IsOptional()
   @IsString()
-  rejectionReason?: string;
+  comments?: string;
 }
-

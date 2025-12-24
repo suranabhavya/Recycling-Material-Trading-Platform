@@ -1,6 +1,7 @@
-import { IsString, IsNumber, IsOptional, IsArray, Min } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsOptional, IsArray, IsBoolean } from 'class-validator';
 
 export class CreateMaterialDto {
+  @IsNotEmpty()
   @IsString()
   name: string;
 
@@ -8,21 +9,24 @@ export class CreateMaterialDto {
   @IsString()
   description?: string;
 
+  @IsNotEmpty()
   @IsNumber()
-  @Min(0)
   quantity: number;
 
+  @IsNotEmpty()
   @IsString()
   unit: string;
 
   @IsOptional()
   @IsNumber()
-  @Min(0)
   price?: number;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   images?: string[];
-}
 
+  @IsOptional()
+  @IsBoolean()
+  requiresApproval?: boolean;
+}

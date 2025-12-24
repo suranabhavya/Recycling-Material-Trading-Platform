@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
+import { RegisterCompanyDto } from './dto/register-company.dto';
 import { LoginDto } from './dto/login.dto';
 import { SendOtpDto, VerifyOtpDto, ResetPasswordDto } from './dto/verify-otp.dto';
 
@@ -12,6 +13,11 @@ export class AuthController {
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
+  }
+
+  @Post('register-company')
+  registerCompany(@Body() dto: RegisterCompanyDto) {
+    return this.authService.registerCompany(dto);
   }
 
   @Post('verify-otp')
@@ -42,6 +48,6 @@ export class AuthController {
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   getProfile(@Request() req: { user: any }) {
-    return req.user;
+    return req.user.user;
   }
 }

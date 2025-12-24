@@ -1,12 +1,30 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request, Patch } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  Put,
+} from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { JoinCompanyDto } from './dto/join-company.dto';
+import { AssignManagerDto } from './dto/assign-manager.dto';
+import { UpdateUserTypeDto } from './dto/update-user-type.dto';
+import { JwtAuthGuard } from '../auth/strategies/jwt-auth.guard';
 
-@Controller('companies')
+@Controller('company')
+@UseGuards(JwtAuthGuard)
 export class CompanyController {
-  constructor(private companyService: CompanyService) {}
+  constructor(private readonly companyService: CompanyService) {}
+
+  @Post()
+  create(@Body() createCompanyDto: CreateCompanyDto, @Request() req) {
+    return this.companyService.create(createCompanyDto, req.user.userId);
+  }
 
   @Get()
   findAll() {
@@ -18,88 +36,48 @@ export class CompanyController {
     return this.companyService.findOne(id);
   }
 
-  @Post()
-  @UseGuards(AuthGuard('jwt'))
-  create(@Body() createCompanyDto: CreateCompanyDto, @Request() req: { user: any }) {
-    return this.companyService.create(createCompanyDto, req.user.id);
-  }
-
   @Post('join')
-  @UseGuards(AuthGuard('jwt'))
-  join(@Body() joinCompanyDto: JoinCompanyDto, @Request() req: { user: any }) {
-    return this.companyService.joinCompany(joinCompanyDto, req.user.id);
+  joinCompany(@Body() joinCompanyDto: JoinCompanyDto, @Request() req) {
+    return this.companyService.joinCompany(joinCompanyDto, req.user.userId);
   }
 
-  @Get(':id/pending-approvals')
-  @UseGuards(AuthGuard('jwt'))
-  getPendingApprovals(@Param('id') id: string) {
-    return this.companyService.getPendingApprovals(id);
+  @Get(':id/join-requests')
+  getPendingJoinRequests(@Param('id') id: string, @Request() req) {
+    return this.companyService.getPendingJoinRequests(id, req.user.userId);
   }
 
-  @Post('approve/:userId')
-  @UseGuards(AuthGuard('jwt'))
-  approveUser(@Param('userId') userId: string, @Request() req: { user: any }) {
-    return this.companyService.approveUser(userId, req.user.id);
+  @Put('join-requests/:userId/approve')
+  approveJoinRequest(@Param('userId') userId: string, @Request() req) {
+    return this.companyService.approveJoinRequest(userId, req.user.userId);
   }
 
-  @Post('reject/:userId')
-  @UseGuards(AuthGuard('jwt'))
-  rejectUser(@Param('userId') userId: string, @Request() req: { user: any }) {
-    return this.companyService.rejectUser(userId, req.user.id);
+  @Put('join-requests/:userId/reject')
+  rejectJoinRequest(@Param('userId') userId: string, @Request() req) {
+    return this.companyService.rejectJoinRequest(userId, req.user.userId);
   }
 
   @Get(':id/members')
-  @UseGuards(AuthGuard('jwt'))
   getCompanyMembers(@Param('id') id: string) {
     return this.companyService.getCompanyMembers(id);
   }
 
-  @Patch('update-role/:userId')
-  @UseGuards(AuthGuard('jwt'))
-  updateUserRole(
-    @Param('userId') userId: string,
-    @Body('roleTemplateId') roleTemplateId: string,
-    @Request() req: { user: any },
-  ) {
-    return this.companyService.updateUserRole(userId, roleTemplateId, req.user.id);
+  @Put('members/user-type')
+  updateUserType(@Body() dto: UpdateUserTypeDto, @Request() req) {
+    return this.companyService.updateUserType(dto, req.user.userId);
   }
 
-  @Post('kick/:userId')
-  @UseGuards(AuthGuard('jwt'))
-  kickMember(@Param('userId') userId: string, @Request() req: { user: any }) {
-    return this.companyService.kickMember(userId, req.user.id);
+  @Put('members/assign-manager')
+  assignDirectManager(@Body() dto: AssignManagerDto, @Request() req) {
+    return this.companyService.assignDirectManager(dto, req.user.userId);
   }
 
-  @Patch('assign-manager')
-  @UseGuards(AuthGuard('jwt'))
-  assignManager(
-    @Body('userId') userId: string,
-    @Body('managerId') managerId: string,
-    @Request() req: { user: any },
-  ) {
-    return this.companyService.assignManager(userId, managerId, req.user.id);
+  @Delete('members/:userId')
+  removeFromCompany(@Param('userId') userId: string, @Request() req) {
+    return this.companyService.removeFromCompany(userId, req.user.userId);
   }
 
-  @Patch('assign-org-unit')
-  @UseGuards(AuthGuard('jwt'))
-  assignOrgUnit(
-    @Body('userId') userId: string,
-    @Body('orgUnitId') orgUnitId: string,
-    @Body('isOrgUnitHead') isOrgUnitHead: boolean,
-    @Request() req: { user: any },
-  ) {
-    return this.companyService.assignOrgUnit(userId, orgUnitId, req.user.id, isOrgUnitHead);
-  }
-
-  @Get('subordinates/me')
-  @UseGuards(AuthGuard('jwt'))
-  getMySubordinates(@Request() req: { user: any }) {
-    return this.companyService.getSubordinates(req.user.id);
-  }
-
-  @Get(':id/hierarchy')
-  @UseGuards(AuthGuard('jwt'))
-  getCompanyHierarchy(@Param('id') id: string) {
-    return this.companyService.getCompanyHierarchy(id);
+  @Get(':id/org-chart')
+  getOrgChart(@Param('id') id: string) {
+    return this.companyService.getOrgChart(id);
   }
 }

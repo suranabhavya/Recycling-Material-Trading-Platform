@@ -7,6 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================
+// ENUMS
+// ============================================
+
 enum CompanyType {
   AUTOMOBILE
   RECYCLING
@@ -14,101 +18,83 @@ enum CompanyType {
   OTHERS
 }
 
-enum MaterialStatus {
-  PENDING           // Waiting for approval at some level
-  APPROVED          // Approved and listed for selling
-  REJECTED          // Rejected at some level
+enum UserType {
+  OWNER         // Highest level - full access to everything (Crown icon)
+  ADMIN         // Customizable permissions per feature/group (Star icon)
+  USER          // Regular employee - sees only assigned content
 }
 
-enum ApprovalStatus {
+enum JoinRequestStatus {
   PENDING
   APPROVED
   REJECTED
 }
 
-enum HierarchyMode {
-  SIMPLE    // Just role levels + manager relationships
-  ADVANCED  // Full organizational tree structure
+enum MaterialStatus {
+  PENDING       // Waiting for approval
+  APPROVED      // Approved and listed
+  REJECTED      // Rejected by manager
+}
+
+enum ApprovalAction {
+  APPROVED
+  REJECTED
+}
+
+// Feature types that admins can have permissions for
+enum FeatureType {
+  USERS              // User management
+  MATERIALS          // Material management
+  ORG_CHART          // Organizational chart
+  SMART_GROUPS       // Smart groups management
+  COMPANY_SETTINGS   // Company settings
+}
+
+// Access levels for each feature
+enum AccessLevel {
+  VIEW          // Can only view
+  EDIT          // Can view and edit
+  MANAGE        // Can view, edit, and manage settings
+  FULL          // Full control including delete
+}
+
+// Scope of permission
+enum PermissionScope {
+  ALL                // Access to all items in the feature
+  SMART_GROUP        // Access only to specific smart group
+  ORG_UNIT           // Access only to specific org unit
+  BRANCH             // Access only to specific branch
+  DIRECT_REPORTS     // Access only to direct reports
 }
 
 // ============================================
-// COMPANY & HIERARCHY SETUP
+// COMPANY
 // ============================================
 
 model Company {
-  id                String                @id @default(uuid())
+  id                String        @id @default(uuid())
   name              String
-  email             String                @unique
+  email             String        @unique
   phone             String?
   address           String?
-  type              CompanyType
-  hierarchyMode     HierarchyMode         @default(SIMPLE) @map("hierarchy_mode")
+  type              CompanyType   @default(OTHERS)
 
+  // Business industry information
+  industry          String?
+  subtype           String?
+
+  // Relations
   users             User[]
-  roleTemplates     RoleTemplate[]
-  orgUnits          OrganizationalUnit[]
   materials         Material[]
+  smartGroups       SmartGroup[]
+  orgUnits          OrgUnit[]
+  roles             Role[]
+  branches          Branch[]
 
-  createdAt         DateTime              @default(now()) @map("created_at")
-  updatedAt         DateTime              @updatedAt @map("updated_at")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
 
   @@map("companies")
-}
-
-// Role templates define what users CAN DO (permissions)
-model RoleTemplate {
-  id                String   @id @default(uuid())
-  companyId         String   @map("company_id")
-  name              String   // "Admin", "Regional Head", "State Manager", "Sales Member"
-  level             Int      // 1 = top (Admin), higher numbers = lower in hierarchy
-  permissions       Json     // { canInviteUsers: true, canManageUsers: true, canDeleteMaterials: true, ... }
-  requiresApproval  Boolean  @default(false) @map("requires_approval") // Does this role need approval before posting materials?
-  description       String?  // Optional description of the role
-
-  company           Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  users             User[]
-  approvalPaths     ApprovalPath[]
-
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
-
-  @@unique([companyId, level])
-  @@map("role_templates")
-}
-
-// Defines approval sequence for a role
-model ApprovalPath {
-  id                String       @id @default(uuid())
-  roleTemplateId    String       @map("role_template_id")
-  roleTemplate      RoleTemplate @relation(fields: [roleTemplateId], references: [id], onDelete: Cascade)
-
-  approverLevel     Int          @map("approver_level")  // Which level must approve
-  sequenceOrder     Int          @map("sequence_order")  // Order in the chain (1, 2, 3...)
-
-  createdAt         DateTime     @default(now()) @map("created_at")
-
-  @@unique([roleTemplateId, sequenceOrder])
-  @@map("approval_paths")
-}
-
-// Organizational units define WHERE users work (structure/geography)
-// Only used when hierarchyMode = ADVANCED
-model OrganizationalUnit {
-  id                String                @id @default(uuid())
-  companyId         String                @map("company_id")
-  name              String                // "APAC Region 1", "North India Division", "Delhi Dealership"
-  parentId          String?               @map("parent_id")
-  metadata          Json?                 // { type: "region", location: "APAC", color: "#FF5733" }
-
-  company           Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  parent            OrganizationalUnit?   @relation("OrgTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children          OrganizationalUnit[]  @relation("OrgTree")
-  users             User[]
-
-  createdAt         DateTime              @default(now()) @map("created_at")
-  updatedAt         DateTime              @updatedAt @map("updated_at")
-
-  @@map("organizational_units")
 }
 
 // ============================================
@@ -116,108 +102,273 @@ model OrganizationalUnit {
 // ============================================
 
 model User {
-  id                      String                @id @default(uuid())
-  email                   String                @unique
-  password                String
-  name                    String
-  isVerified              Boolean               @default(false) @map("is_verified")
+  id                    String              @id @default(uuid())
+  email                 String              @unique
+  password              String
+  name                  String
+  phone                 String?
+  isVerified            Boolean             @default(false) @map("is_verified")
+
+  // User type in Connecteam model
+  userType              UserType            @default(USER) @map("user_type")
 
   // Company relationship
-  companyId               String?               @map("company_id")
-  company                 Company?              @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  companyApprovalStatus   ApprovalStatus?       @default(PENDING) @map("company_approval_status")
+  companyId             String?             @map("company_id")
+  company               Company?            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  joinRequestStatus     JoinRequestStatus?  @default(PENDING) @map("join_request_status")
 
-  // Hybrid hierarchy fields
-  roleTemplateId          String?               @map("role_template_id")
-  roleTemplate            RoleTemplate?         @relation(fields: [roleTemplateId], references: [id], onDelete: SetNull)
+  // Direct Manager (Core hierarchy mechanism - like Connecteam)
+  directManagerId       String?             @map("direct_manager_id")
+  directManager         User?               @relation("DirectReports", fields: [directManagerId], references: [id], onDelete: SetNull)
+  directReports         User[]              @relation("DirectReports")
 
-  // For SIMPLE mode: direct manager relationship
-  managerId               String?               @map("manager_id")
-  manager                 User?                 @relation("ManagerSubordinates", fields: [managerId], references: [id], onDelete: SetNull)
-  subordinates            User[]                @relation("ManagerSubordinates")
+  // Role (for grouping and permissions reference)
+  roleId                String?             @map("role_id")
+  role                  Role?               @relation(fields: [roleId], references: [id], onDelete: SetNull)
 
-  // For ADVANCED mode: organizational unit
-  orgUnitId               String?               @map("org_unit_id")
-  orgUnit                 OrganizationalUnit?   @relation(fields: [orgUnitId], references: [id], onDelete: SetNull)
-  isOrgUnitHead           Boolean               @default(false) @map("is_org_unit_head") // True if user manages this org unit
+  // Organizational Unit (optional - for org chart visualization)
+  orgUnitId             String?             @map("org_unit_id")
+  orgUnit               OrgUnit?            @relation(fields: [orgUnitId], references: [id], onDelete: SetNull)
+
+  // Branch (Connecteam-style location/operational unit)
+  branchId              String?             @map("branch_id")
+  branch                Branch?             @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  // Custom fields (extensible user profile - like Connecteam's custom fields)
+  customFields          Json?               @map("custom_fields")
+
+  // Admin permissions (only for ADMIN user type)
+  adminPermissions      AdminPermission[]
+
+  // Smart group memberships
+  smartGroupMemberships SmartGroupMember[]
 
   // Materials
-  createdMaterials        Material[]            @relation("CreatedMaterials")
-  approvedMaterials       Material[]            @relation("ApprovedMaterials")
-  approvalActions         ApprovalHistory[]     @relation("ApprovalActions")
+  createdMaterials      Material[]          @relation("MaterialCreator")
+  materialApprovals     MaterialApproval[]
 
-  createdAt               DateTime              @default(now()) @map("created_at")
-  updatedAt               DateTime              @updatedAt @map("updated_at")
+  createdAt             DateTime            @default(now()) @map("created_at")
+  updatedAt             DateTime            @updatedAt @map("updated_at")
 
+  @@index([companyId, userType])
+  @@index([directManagerId])
+  @@index([roleId])
+  @@index([branchId])
   @@map("users")
 }
 
 // ============================================
-// MATERIALS & APPROVAL SYSTEM
+// ROLES (for grouping, not permissions)
+// ============================================
+
+model Role {
+  id                String    @id @default(uuid())
+  companyId         String    @map("company_id")
+  name              String
+  description       String?
+  color             String?
+
+  company           Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  users             User[]
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@unique([companyId, name])
+  @@map("roles")
+}
+
+// ============================================
+// BRANCHES (Connecteam-style locations/operational units)
+// ============================================
+
+model Branch {
+  id                String      @id @default(uuid())
+  companyId         String      @map("company_id")
+  name              String
+  description       String?
+
+  // Location information
+  address           String?
+  city              String?
+  state             String?
+  country           String?
+  zipCode           String?     @map("zip_code")
+
+  // Contact information
+  phoneNumber       String?     @map("phone_number")
+  email             String?
+
+  // Branch manager (optional - can be any user in the branch)
+  managerId         String?     @map("manager_id")
+
+  // Metadata for custom fields (hours of operation, branch code, etc.)
+  metadata          Json?
+
+  // Is this the main/headquarters branch
+  isHeadquarters    Boolean     @default(false) @map("is_headquarters")
+
+  // Active status
+  isActive          Boolean     @default(true) @map("is_active")
+
+  company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  users             User[]
+  materials         Material[]
+  adminPermissions  AdminPermission[]
+
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  @@unique([companyId, name])
+  @@index([companyId])
+  @@index([isActive])
+  @@map("branches")
+}
+
+// ============================================
+// ORGANIZATIONAL STRUCTURE
+// ============================================
+
+model OrgUnit {
+  id                String      @id @default(uuid())
+  companyId         String      @map("company_id")
+  name              String
+  parentId          String?     @map("parent_id")
+  metadata          Json?
+
+  company           Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  parent            OrgUnit?    @relation("OrgUnitTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children          OrgUnit[]   @relation("OrgUnitTree")
+  users             User[]
+
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  @@map("org_units")
+}
+
+// ============================================
+// SMART GROUPS
+// ============================================
+
+model SmartGroup {
+  id                String              @id @default(uuid())
+  companyId         String              @map("company_id")
+  name              String
+  description       String?
+  criteria          Json?
+  isManual          Boolean             @default(false) @map("is_manual")
+
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  members           SmartGroupMember[]
+  adminPermissions  AdminPermission[]
+
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+
+  @@unique([companyId, name])
+  @@map("smart_groups")
+}
+
+model SmartGroupMember {
+  id            String      @id @default(uuid())
+  smartGroupId  String      @map("smart_group_id")
+  userId        String      @map("user_id")
+
+  smartGroup    SmartGroup  @relation(fields: [smartGroupId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  addedAt       DateTime    @default(now()) @map("added_at")
+
+  @@unique([smartGroupId, userId])
+  @@map("smart_group_members")
+}
+
+// ============================================
+// ADMIN PERMISSIONS
+// ============================================
+
+model AdminPermission {
+  id                String            @id @default(uuid())
+  adminId           String            @map("admin_id")
+  admin             User              @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  featureType       FeatureType       @map("feature_type")
+  accessLevel       AccessLevel       @map("access_level")
+  permissionScope   PermissionScope   @map("permission_scope")
+
+  smartGroupId      String?           @map("smart_group_id")
+  smartGroup        SmartGroup?       @relation(fields: [smartGroupId], references: [id], onDelete: Cascade)
+
+  orgUnitId         String?           @map("org_unit_id")
+
+  branchId          String?           @map("branch_id")
+  branch            Branch?           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  deepPermissions   Json?             @map("deep_permissions")
+
+  createdAt         DateTime          @default(now()) @map("created_at")
+
+  @@index([adminId])
+  @@index([adminId, featureType, permissionScope])
+  @@map("admin_permissions")
+}
+
+// ============================================
+// MATERIALS
 // ============================================
 
 model Material {
-  id                    String         @id @default(uuid())
-  name                  String
-  description           String?
-  quantity              Float
-  unit                  String
-  price                 Float?
-  images                String[]       @default([])
-  status                MaterialStatus @default(PENDING)
+  id                String              @id @default(uuid())
+  name              String
+  description       String?
+  quantity          Float
+  unit              String
+  price             Float?
+  images            String[]            @default([])
+  status            MaterialStatus      @default(PENDING)
 
-  // Approval tracking
-  currentApprovalLevel  Int?           @map("current_approval_level") // Which level needs to approve next (null if approved/rejected)
-  requiredApprovalLevels Int[]         @default([]) @map("required_approval_levels") // Snapshot at creation: [4, 3, 2]
-  approvalHistory       ApprovalHistory[]
-  rejectionReason       String?        @map("rejection_reason")
+  creatorId         String              @map("creator_id")
+  creator           User                @relation("MaterialCreator", fields: [creatorId], references: [id], onDelete: Cascade)
 
-  // Snapshot creator's reporting structure (for determining who should approve)
-  creatorOrgUnitId      String?        @map("creator_org_unit_id")   // For ADVANCED mode
-  creatorManagerId      String?        @map("creator_manager_id")    // For SIMPLE mode
+  companyId         String              @map("company_id")
+  company           Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  // Creator
-  creatorId             String         @map("creator_id")
-  creator               User           @relation("CreatedMaterials", fields: [creatorId], references: [id], onDelete: Cascade)
+  branchId          String?             @map("branch_id")
+  branch            Branch?             @relation(fields: [branchId], references: [id], onDelete: SetNull)
 
-  // Company
-  companyId             String         @map("company_id")
-  company               Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creatorManagerId  String?             @map("creator_manager_id")
+  requiresApproval  Boolean             @default(false) @map("requires_approval")
+  approvals         MaterialApproval[]
+  rejectionReason   String?             @map("rejection_reason")
+  finalizedAt       DateTime?           @map("finalized_at")
 
-  // Last approver (for quick reference)
-  lastApproverId        String?        @map("last_approver_id")
-  lastApprover          User?          @relation("ApprovedMaterials", fields: [lastApproverId], references: [id], onDelete: SetNull)
-  lastApprovedAt        DateTime?      @map("last_approved_at")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
 
-  createdAt             DateTime       @default(now()) @map("created_at")
-  updatedAt             DateTime       @updatedAt @map("updated_at")
-
+  @@index([companyId, status])
+  @@index([creatorId])
+  @@index([creatorManagerId])
+  @@index([branchId])
   @@map("materials")
-  @@index([currentApprovalLevel, status])  // Fast: "Show pending at level 3"
-  @@index([creatorOrgUnitId])             // Fast: "From my org unit"
-  @@index([creatorManagerId])             // Fast: "From my subordinates"
 }
 
-// Tracks every approval action (replaces JSON approvalChain)
-model ApprovalHistory {
-  id            String         @id @default(uuid())
-  materialId    String         @map("material_id")
-  material      Material       @relation(fields: [materialId], references: [id], onDelete: Cascade)
+model MaterialApproval {
+  id                String          @id @default(uuid())
+  materialId        String          @map("material_id")
+  material          Material        @relation(fields: [materialId], references: [id], onDelete: Cascade)
 
-  level         Int           // Which level approved/rejected
-  userId        String         @map("user_id")
-  user          User           @relation("ApprovalActions", fields: [userId], references: [id])
+  approverId        String          @map("approver_id")
+  approver          User            @relation(fields: [approverId], references: [id], onDelete: Cascade)
 
-  action        ApprovalStatus // APPROVED or REJECTED
-  comments      String?        // Rejection reason or approval notes
-  timeTakenMs   Int?           @map("time_taken_ms") // For analytics: time from material creation/previous approval
+  action            ApprovalAction
+  comments          String?
 
-  approvedAt    DateTime       @default(now()) @map("approved_at")
+  approvedAt        DateTime        @default(now()) @map("approved_at")
 
-  @@map("approval_history")
   @@index([materialId])
-  @@index([userId, approvedAt])
-  @@index([level, action])
+  @@index([approverId])
+  @@map("material_approvals")
 }
 
 // ============================================
@@ -228,7 +379,7 @@ model Otp {
   id        String   @id @default(uuid())
   email     String
   otp       String
-  type      String   // 'verification' or 'reset_password'
+  type      String
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 

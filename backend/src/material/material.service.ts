@@ -1,68 +1,55 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMaterialDto } from './dto/create-material.dto';
-import { UpdateMaterialDto } from './dto/update-material.dto';
-import { MaterialApprovalService } from './material-approval.service';
-import { MaterialStatus } from '@prisma/client';
+import { ApproveMaterialDto } from './dto/approve-material.dto';
+import { MaterialStatus, ApprovalAction, JoinRequestStatus } from '@prisma/client';
 
 @Injectable()
 export class MaterialService {
-  constructor(
-    private prisma: PrismaService,
-    private approvalService: MaterialApprovalService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async create(userId: string, createMaterialDto: CreateMaterialDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+  // =====================================================
+  // MATERIAL CRUD
+  // =====================================================
+
+  async create(dto: CreateMaterialDto, creatorId: string) {
+    const creator = await this.prisma.user.findUnique({
+      where: { id: creatorId },
       include: {
-        company: {
-          include: {
-            roleTemplates: {
-              orderBy: { level: 'asc' },
-            },
-          },
-        },
-        roleTemplate: true
+        directManager: true,
       },
     });
 
-    if (!user || !user.companyId || !user.company) {
-      throw new ForbiddenException('You must be part of a company to create materials');
+    if (!creator || !creator.companyId) {
+      throw new BadRequestException('User must be part of a company to create materials');
     }
 
-    if (user.companyApprovalStatus !== 'APPROVED') {
-      throw new ForbiddenException('Your company membership must be approved first');
+    if (creator.joinRequestStatus !== JoinRequestStatus.APPROVED) {
+      throw new BadRequestException('User must be approved to create materials');
     }
 
-    if (!user.roleTemplate) {
-      throw new ForbiddenException('You must have a role assigned to create materials');
-    }
-
-    // Calculate required approval levels (snapshot)
-    const requiredLevels: number[] = [];
-    for (const role of user.company.roleTemplates) {
-      if (role.level < user.roleTemplate.level && role.requiresApproval) {
-        requiredLevels.push(role.level);
-      }
-    }
-
-    const status = requiredLevels.length === 0
-      ? MaterialStatus.APPROVED
-      : MaterialStatus.PENDING;
-
-    const currentApprovalLevel = requiredLevels.length > 0 ? requiredLevels[0] : null;
+    // Determine if approval is required
+    const requiresApproval = dto.requiresApproval ?? (creator.directManagerId ? true : false);
 
     return this.prisma.material.create({
       data: {
-        ...createMaterialDto,
-        creatorId: userId,
-        companyId: user.companyId,
-        creatorManagerId: user.managerId,
-        creatorOrgUnitId: user.orgUnitId,
-        requiredApprovalLevels: requiredLevels,
-        status,
-        currentApprovalLevel: currentApprovalLevel,
+        name: dto.name,
+        description: dto.description,
+        quantity: dto.quantity,
+        unit: dto.unit,
+        price: dto.price,
+        images: dto.images || [],
+        creatorId,
+        companyId: creator.companyId,
+        creatorManagerId: creator.directManagerId,
+        requiresApproval,
+        status: requiresApproval ? MaterialStatus.PENDING : MaterialStatus.APPROVED,
+        finalizedAt: requiresApproval ? null : new Date(),
       },
       include: {
         creator: {
@@ -70,27 +57,31 @@ export class MaterialService {
             id: true,
             name: true,
             email: true,
-            roleTemplate: {
-              select: {
-                name: true,
-                level: true,
-              },
-            },
           },
         },
-        company: {
+      },
+    });
+  }
+
+  async findAll(companyId: string, userId?: string) {
+    return this.prisma.material.findMany({
+      where: {
+        companyId,
+      },
+      include: {
+        creator: {
           select: {
             id: true,
             name: true,
+            email: true,
           },
         },
-        approvalHistory: {
+        approvals: {
           include: {
-            user: {
+            approver: {
               select: {
                 id: true,
                 name: true,
-                email: true,
               },
             },
           },
@@ -99,74 +90,13 @@ export class MaterialService {
           },
         },
       },
-    });
-  }
-
-  async findAll(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user || !user.companyId) {
-      return [];
-    }
-
-    return this.prisma.material.findMany({
-      where: {
-        companyId: user.companyId,
-      },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            roleTemplate: {
-              select: {
-                name: true,
-                level: true,
-              },
-            },
-          },
-        },
-      },
       orderBy: {
         createdAt: 'desc',
       },
     });
   }
 
-  async findMyMaterials(userId: string) {
-    return this.prisma.material.findMany({
-      where: {
-        creatorId: userId,
-      },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        lastApprover: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-  }
-
-  async findOne(id: string, userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
+  async findOne(id: string) {
     const material = await this.prisma.material.findUnique({
       where: { id },
       include: {
@@ -175,29 +105,17 @@ export class MaterialService {
             id: true,
             name: true,
             email: true,
-            roleTemplate: {
+            directManager: {
               select: {
+                id: true,
                 name: true,
-                level: true,
               },
             },
           },
         },
-        company: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        lastApprover: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        approvalHistory: {
+        approvals: {
           include: {
-            user: {
+            approver: {
               select: {
                 id: true,
                 name: true,
@@ -206,7 +124,7 @@ export class MaterialService {
             },
           },
           orderBy: {
-            approvedAt: 'desc',
+            approvedAt: 'asc',
           },
         },
       },
@@ -214,35 +132,42 @@ export class MaterialService {
 
     if (!material) {
       throw new NotFoundException('Material not found');
-    }
-
-    if (material.companyId !== user?.companyId) {
-      throw new ForbiddenException('You can only view materials from your company');
     }
 
     return material;
   }
 
-  async update(id: string, userId: string, updateMaterialDto: UpdateMaterialDto) {
-    const material = await this.prisma.material.findUnique({
-      where: { id },
+  async getPendingApprovalsForUser(userId: string) {
+    // Get materials where:
+    // 1. Material is PENDING
+    // 2. User is the direct manager of the creator
+    // 3. Material hasn't been approved/rejected by this user yet
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        directReports: {
+          select: { id: true },
+        },
+      },
     });
 
-    if (!material) {
-      throw new NotFoundException('Material not found');
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
 
-    if (material.creatorId !== userId) {
-      throw new ForbiddenException('You can only update your own materials');
-    }
+    const directReportIds = user.directReports.map(u => u.id);
 
-    if (material.status !== MaterialStatus.PENDING) {
-      throw new ForbiddenException('Cannot update material that is already approved or rejected');
-    }
-
-    return this.prisma.material.update({
-      where: { id },
-      data: updateMaterialDto,
+    const pendingMaterials = await this.prisma.material.findMany({
+      where: {
+        status: MaterialStatus.PENDING,
+        creatorId: { in: directReportIds },
+        approvals: {
+          none: {
+            approverId: userId,
+          },
+        },
+      },
       include: {
         creator: {
           select: {
@@ -251,23 +176,39 @@ export class MaterialService {
             email: true,
           },
         },
-        company: {
-          select: {
-            id: true,
-            name: true,
+        approvals: {
+          include: {
+            approver: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
       },
+      orderBy: {
+        createdAt: 'asc',
+      },
     });
+
+    return pendingMaterials;
   }
 
-  async remove(id: string, userId: string) {
+  // =====================================================
+  // APPROVAL FLOW
+  // =====================================================
+
+  async approveMaterial(materialId: string, approverId: string, dto: ApproveMaterialDto) {
     const material = await this.prisma.material.findUnique({
-      where: { id },
+      where: { id: materialId },
       include: {
         creator: {
-          include: { roleTemplate: true },
+          include: {
+            directManager: true,
+          },
         },
+        approvals: true,
       },
     });
 
@@ -275,16 +216,108 @@ export class MaterialService {
       throw new NotFoundException('Material not found');
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: { roleTemplate: true },
+    if (material.status !== MaterialStatus.PENDING) {
+      throw new BadRequestException('Material is not pending approval');
+    }
+
+    const approver = await this.prisma.user.findUnique({
+      where: { id: approverId },
+      include: {
+        directReports: true,
+      },
     });
 
-    const isCreator = material.creatorId === userId;
-    const isAdmin = user?.roleTemplate?.level === 1;
+    if (!approver) {
+      throw new NotFoundException('Approver not found');
+    }
 
-    if (!isCreator && !isAdmin) {
-      throw new ForbiddenException('You can only delete your own materials or be an admin');
+    // Verify approver is the direct manager of the creator
+    if (material.creatorManagerId !== approverId) {
+      throw new ForbiddenException('You are not authorized to approve this material');
+    }
+
+    // Check if already approved/rejected by this user
+    const existingApproval = material.approvals.find(a => a.approverId === approverId);
+    if (existingApproval) {
+      throw new BadRequestException('You have already acted on this material');
+    }
+
+    // Create approval record
+    await this.prisma.materialApproval.create({
+      data: {
+        materialId,
+        approverId,
+        action: dto.action,
+        comments: dto.comments,
+      },
+    });
+
+    // Update material status
+    if (dto.action === ApprovalAction.REJECTED) {
+      await this.prisma.material.update({
+        where: { id: materialId },
+        data: {
+          status: MaterialStatus.REJECTED,
+          rejectionReason: dto.comments,
+          finalizedAt: new Date(),
+        },
+      });
+
+      return { message: 'Material rejected', status: MaterialStatus.REJECTED };
+    }
+
+    // If approved by direct manager, check if there's a manager above
+    if (approver.directManagerId) {
+      // There's a manager above - update creatorManagerId to next level
+      await this.prisma.material.update({
+        where: { id: materialId },
+        data: {
+          creatorManagerId: approver.directManagerId,
+        },
+      });
+
+      return {
+        message: 'Material approved, sent to next level',
+        status: MaterialStatus.PENDING,
+        nextApprover: approver.directManagerId,
+      };
+    } else {
+      // This is the final approver
+      await this.prisma.material.update({
+        where: { id: materialId },
+        data: {
+          status: MaterialStatus.APPROVED,
+          finalizedAt: new Date(),
+        },
+      });
+
+      return { message: 'Material fully approved', status: MaterialStatus.APPROVED };
+    }
+  }
+
+  async delete(id: string, userId: string) {
+    const material = await this.prisma.material.findUnique({
+      where: { id },
+    });
+
+    if (!material) {
+      throw new NotFoundException('Material not found');
+    }
+
+    // Only creator or company owner can delete
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isCreator = material.creatorId === userId;
+    const isOwner = user.userType === 'OWNER' && user.companyId === material.companyId;
+
+    if (!isCreator && !isOwner) {
+      throw new ForbiddenException('Only the creator or company owner can delete this material');
     }
 
     await this.prisma.material.delete({
@@ -292,34 +325,5 @@ export class MaterialService {
     });
 
     return { message: 'Material deleted successfully' };
-  }
-
-  async getInventory(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user || !user.companyId) {
-      return [];
-    }
-
-    return this.prisma.material.findMany({
-      where: {
-        companyId: user.companyId,
-        status: MaterialStatus.APPROVED,
-      },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-      },
-      orderBy: {
-        lastApprovedAt: 'desc',
-      },
-    });
   }
 }

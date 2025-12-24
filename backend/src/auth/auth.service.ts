@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { RegisterDto } from './dto/register.dto';
+import { RegisterCompanyDto } from './dto/register-company.dto';
 import { LoginDto } from './dto/login.dto';
 import { SendOtpDto, VerifyOtpDto, ResetPasswordDto } from './dto/verify-otp.dto';
 
@@ -48,6 +49,84 @@ export class AuthService {
       // If OTP sending fails, delete the user that was just created
       await this.prisma.user.deleteMany({
         where: { email: dto.email, isVerified: false },
+      });
+      throw error;
+    }
+  }
+
+  async registerCompany(dto: RegisterCompanyDto) {
+    // Check if user already exists
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (existing) {
+      throw new ConflictException('Email already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const userName = `${dto.firstName} ${dto.lastName}`;
+
+    // Use transaction to create user, company and send OTP
+    try {
+      // Create the company first
+      const company = await this.prisma.company.create({
+        data: {
+          name: dto.companyName,
+          email: dto.companyEmail || dto.email,
+          phone: dto.companyPhone,
+          address: dto.companyAddress,
+          industry: dto.industry,
+          subtype: dto.subtype,
+        },
+      });
+
+      // Create the user as OWNER of the company
+      const user = await this.prisma.user.create({
+        data: {
+          email: dto.email,
+          password: hashedPassword,
+          name: userName,
+          isVerified: false,
+          companyId: company.id,
+          userType: 'OWNER',
+          joinRequestStatus: 'APPROVED',
+        },
+      });
+
+      // Generate and send OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+      await this.prisma.otp.create({
+        data: {
+          email: dto.email,
+          otp,
+          type: 'verification',
+          expiresAt,
+        },
+      });
+
+      // Send verification email
+      await this.emailService.sendVerificationOtp(dto.email, otp, userName);
+
+      // Log OTP to console for development
+      console.log(`\n========================================`);
+      console.log(`OTP for ${dto.email}: ${otp}`);
+      console.log(`========================================\n`);
+
+      return {
+        message: 'Company registration successful. Please verify your email with the OTP sent.',
+        email: user.email,
+        companyId: company.id,
+      };
+    } catch (error) {
+      // If anything fails, clean up
+      await this.prisma.user.deleteMany({
+        where: { email: dto.email, isVerified: false },
+      });
+      await this.prisma.company.deleteMany({
+        where: { name: dto.companyName, users: { none: {} } },
       });
       throw error;
     }
@@ -126,7 +205,8 @@ export class AuthService {
         name: user!.name,
         isVerified: user!.isVerified,
         companyId: user!.companyId,
-        companyApprovalStatus: user!.companyApprovalStatus,
+        joinRequestStatus: user!.joinRequestStatus,
+        userType: user!.userType,
         company: user!.company,
       },
       token,
@@ -162,7 +242,8 @@ export class AuthService {
         name: user.name,
         isVerified: user.isVerified,
         companyId: user.companyId,
-        companyApprovalStatus: user.companyApprovalStatus,
+        joinRequestStatus: user.joinRequestStatus,
+        userType: user.userType,
         company: user.company,
       },
       token,

@@ -15,9 +15,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: any) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
-      include: { 
+      include: {
         company: true,
-        roleTemplate: true,
+        role: true,
       },
     });
 
@@ -25,6 +25,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
-    return user;
+    // Map userType to roleTemplate for compatibility with Flutter app
+    const roleTemplate = {
+      isAdmin: user.userType === 'OWNER' || user.userType === 'ADMIN',
+      name: user.userType,
+    };
+
+    return {
+      userId: user.id,
+      email: user.email,
+      user: {
+        ...user,
+        roleTemplate,
+        companyApprovalStatus: user.joinRequestStatus,
+      },
+    };
   }
 }

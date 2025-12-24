@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class JoinCompanyDto {
+export class AddMemberDto {
   @IsNotEmpty()
   @IsString()
-  companyId: string;
+  userId: string;
 }

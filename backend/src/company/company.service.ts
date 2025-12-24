@@ -1,51 +1,47 @@
-import { Injectable, ConflictException, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { JoinCompanyDto } from './dto/join-company.dto';
-import { ApprovalStatus } from '@prisma/client';
+import { AssignManagerDto } from './dto/assign-manager.dto';
+import { UpdateUserTypeDto } from './dto/update-user-type.dto';
+import { UserType, JoinRequestStatus } from '@prisma/client';
 
 @Injectable()
 export class CompanyService {
   constructor(private prisma: PrismaService) {}
 
+  // =====================================================
+  // COMPANY CREATION & MANAGEMENT
+  // =====================================================
+
   async create(createCompanyDto: CreateCompanyDto, userId: string) {
-    const existingCompany = await this.prisma.company.findUnique({
+    // Check if company with email already exists
+    const existing = await this.prisma.company.findUnique({
       where: { email: createCompanyDto.email },
     });
 
-    if (existingCompany) {
+    if (existing) {
       throw new ConflictException('Company with this email already exists');
     }
 
-    const { roleTemplates, orgUnits, ...companyData } = createCompanyDto;
-
+    // Create company
     const company = await this.prisma.company.create({
-      data: {
-        ...companyData,
-        roleTemplates: {
-          create: roleTemplates,
-        },
-        orgUnits: orgUnits ? {
-          create: orgUnits,
-        } : undefined,
-      },
-      include: {
-        roleTemplates: true,
-      },
+      data: createCompanyDto,
     });
 
-    const adminRole = company.roleTemplates.find(r => r.level === 1);
-
-    if (!adminRole) {
-      throw new BadRequestException('Level 1 (Admin) role template is required');
-    }
-
+    // Make the creator the OWNER
     await this.prisma.user.update({
       where: { id: userId },
       data: {
         companyId: company.id,
-        roleTemplateId: adminRole.id,
-        companyApprovalStatus: ApprovalStatus.APPROVED,
+        userType: UserType.OWNER,
+        joinRequestStatus: JoinRequestStatus.APPROVED,
       },
     });
 
@@ -61,7 +57,12 @@ export class CompanyService {
         email: true,
         phone: true,
         address: true,
-        hierarchyMode: true,
+        createdAt: true,
+        _count: {
+          select: {
+            users: true,
+          },
+        },
       },
       orderBy: {
         name: 'asc',
@@ -73,22 +74,44 @@ export class CompanyService {
     const company = await this.prisma.company.findUnique({
       where: { id },
       include: {
-        roleTemplates: {
-          orderBy: { level: 'asc' },
-        },
         users: {
+          where: {
+            joinRequestStatus: JoinRequestStatus.APPROVED,
+          },
           select: {
             id: true,
             name: true,
             email: true,
-            roleTemplate: {
+            phone: true,
+            userType: true,
+            role: {
               select: {
                 id: true,
                 name: true,
-                level: true,
+                color: true,
               },
             },
-            companyApprovalStatus: true,
+            directManager: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            _count: {
+              select: {
+                directReports: true,
+              },
+            },
+          },
+          orderBy: {
+            name: 'asc',
+          },
+        },
+        roles: true,
+        _count: {
+          select: {
+            materials: true,
+            smartGroups: true,
           },
         },
       },
@@ -101,15 +124,13 @@ export class CompanyService {
     return company;
   }
 
+  // =====================================================
+  // JOIN REQUESTS
+  // =====================================================
+
   async joinCompany(joinCompanyDto: JoinCompanyDto, userId: string) {
     const company = await this.prisma.company.findUnique({
       where: { id: joinCompanyDto.companyId },
-      include: {
-        roleTemplates: {
-          orderBy: { level: 'desc' },
-          take: 1,
-        },
-      },
     });
 
     if (!company) {
@@ -124,133 +145,36 @@ export class CompanyService {
       throw new BadRequestException('You are already part of a company');
     }
 
-    const lowestRole = company.roleTemplates[0];
-
-    if (!lowestRole) {
-      throw new BadRequestException('Company has no role templates defined');
-    }
-
+    // Create join request (status will be PENDING by default)
     await this.prisma.user.update({
       where: { id: userId },
       data: {
         companyId: company.id,
-        roleTemplateId: lowestRole.id,
-        companyApprovalStatus: ApprovalStatus.PENDING,
+        userType: UserType.USER, // Default to USER
+        joinRequestStatus: JoinRequestStatus.PENDING,
       },
     });
 
     return {
-      message: 'Request sent to company admin for approval',
+      message: 'Request sent to company owner/admin for approval',
       company,
     };
   }
 
-  async getPendingApprovals(companyId: string) {
+  async getPendingJoinRequests(companyId: string, requesterId: string) {
+    // Check if requester is Owner or Admin
+    await this.ensureOwnerOrAdmin(requesterId, companyId);
+
     return this.prisma.user.findMany({
       where: {
         companyId,
-        companyApprovalStatus: ApprovalStatus.PENDING,
+        joinRequestStatus: JoinRequestStatus.PENDING,
       },
       select: {
         id: true,
         name: true,
         email: true,
-        roleTemplate: {
-          select: {
-            name: true,
-            level: true,
-          },
-        },
-        createdAt: true,
-      },
-    });
-  }
-
-  async approveUser(userId: string, adminId: string) {
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
-      include: { roleTemplate: true },
-    });
-
-    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
-      throw new BadRequestException('Only admins can approve users');
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (user?.companyId !== admin.companyId) {
-      throw new BadRequestException('User not from your company');
-    }
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        companyApprovalStatus: ApprovalStatus.APPROVED,
-      },
-    });
-
-    return { message: 'User approved successfully' };
-  }
-
-  async rejectUser(userId: string, adminId: string) {
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
-      include: { roleTemplate: true },
-    });
-
-    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
-      throw new BadRequestException('Only admins can reject users');
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (user?.companyId !== admin.companyId) {
-      throw new BadRequestException('User not from your company');
-    }
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        companyApprovalStatus: ApprovalStatus.REJECTED,
-      },
-    });
-
-    return { message: 'User rejected' };
-  }
-
-  async getCompanyMembers(companyId: string) {
-    return this.prisma.user.findMany({
-      where: {
-        companyId,
-        companyApprovalStatus: ApprovalStatus.APPROVED,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        roleTemplate: {
-          select: {
-            id: true,
-            name: true,
-            level: true,
-          },
-        },
-        manager: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        orgUnit: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        phone: true,
         createdAt: true,
       },
       orderBy: {
@@ -259,204 +183,82 @@ export class CompanyService {
     });
   }
 
-  async updateUserRole(userId: string, roleTemplateId: string, adminId: string) {
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
-      include: { roleTemplate: true },
-    });
-
-    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
-      throw new BadRequestException('Only admins can update user roles');
-    }
-
+  async approveJoinRequest(userId: string, approverId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { roleTemplate: true },
+      include: { company: true },
     });
 
-    if (!user || user.companyId !== admin.companyId) {
-      throw new BadRequestException('User not from your company');
+    if (!user || !user.companyId) {
+      throw new NotFoundException('User or company not found');
     }
 
-    if (user.roleTemplate?.level === 1 && userId !== adminId) {
-      throw new BadRequestException('Cannot change the role of another admin');
-    }
-
-    const newRole = await this.prisma.roleTemplate.findUnique({
-      where: { id: roleTemplateId },
-    });
-
-    if (!newRole || newRole.companyId !== admin.companyId) {
-      throw new BadRequestException('Invalid role template');
-    }
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { roleTemplateId },
-    });
-
-    return { message: `User role updated to ${newRole.name}` };
-  }
-
-  async assignManager(userId: string, managerId: string, adminId: string) {
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
-      include: { roleTemplate: true },
-    });
-
-    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
-      throw new ForbiddenException('Only admins can assign managers');
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    const manager = await this.prisma.user.findUnique({
-      where: { id: managerId },
-      include: { roleTemplate: true },
-    });
-
-    if (!user || !manager) {
-      throw new NotFoundException('User or manager not found');
-    }
-
-    if (user.companyId !== admin.companyId || manager.companyId !== admin.companyId) {
-      throw new BadRequestException('Users must be from your company');
-    }
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { managerId },
-    });
-
-    return { message: 'Manager assigned successfully' };
-  }
-
-  async assignOrgUnit(userId: string, orgUnitId: string, adminId: string, isOrgUnitHead: boolean = false) {
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
-      include: { roleTemplate: true },
-    });
-
-    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
-      throw new ForbiddenException('Only admins can assign organizational units');
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    const orgUnit = await this.prisma.organizationalUnit.findUnique({
-      where: { id: orgUnitId },
-    });
-
-    if (!user || !orgUnit) {
-      throw new NotFoundException('User or organizational unit not found');
-    }
-
-    if (user.companyId !== admin.companyId || orgUnit.companyId !== admin.companyId) {
-      throw new BadRequestException('User and org unit must be from your company');
-    }
+    // Ensure approver is Owner or Admin
+    await this.ensureOwnerOrAdmin(approverId, user.companyId);
 
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        orgUnitId,
-        isOrgUnitHead,
+        joinRequestStatus: JoinRequestStatus.APPROVED,
       },
     });
 
-    return { message: 'Organizational unit assigned successfully' };
+    return { message: 'User approved successfully' };
   }
 
-  async kickMember(userId: string, adminId: string) {
-    const admin = await this.prisma.user.findUnique({
-      where: { id: adminId },
-      include: { roleTemplate: true },
-    });
-
-    if (!admin?.roleTemplate || admin.roleTemplate.level !== 1) {
-      throw new BadRequestException('Only admins can kick members');
-    }
-
+  async rejectJoinRequest(userId: string, rejecterId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { roleTemplate: true },
+      include: { company: true },
     });
 
-    if (!user || user.companyId !== admin.companyId) {
-      throw new BadRequestException('User not from your company');
+    if (!user || !user.companyId) {
+      throw new NotFoundException('User or company not found');
     }
 
-    if (user.roleTemplate?.level === 1) {
-      throw new BadRequestException('Cannot kick another admin');
-    }
+    // Ensure rejecter is Owner or Admin
+    await this.ensureOwnerOrAdmin(rejecterId, user.companyId);
 
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        companyApprovalStatus: ApprovalStatus.REJECTED,
+        joinRequestStatus: JoinRequestStatus.REJECTED,
+        companyId: null,
+        userType: UserType.USER,
       },
     });
 
-    return { message: 'User kicked from company' };
+    return { message: 'User join request rejected' };
   }
 
-  async getSubordinates(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        company: true,
-        roleTemplate: true,
-      },
-    });
+  // =====================================================
+  // USER MANAGEMENT
+  // =====================================================
 
-    if (!user || !user.roleTemplate) {
-      throw new NotFoundException('User not found');
-    }
-
+  async getCompanyMembers(companyId: string) {
     return this.prisma.user.findMany({
       where: {
-        companyId: user.companyId,
-        managerId: userId,
-        companyApprovalStatus: ApprovalStatus.APPROVED,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        roleTemplate: {
-          select: {
-            name: true,
-            level: true,
-          },
-        },
-        createdAt: true,
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    });
-  }
-
-  async getCompanyHierarchy(companyId: string) {
-    const users = await this.prisma.user.findMany({
-      where: {
         companyId,
-        companyApprovalStatus: ApprovalStatus.APPROVED,
+        joinRequestStatus: JoinRequestStatus.APPROVED,
       },
       select: {
         id: true,
         name: true,
         email: true,
-        managerId: true,
-        createdAt: true,
-        roleTemplate: {
+        phone: true,
+        userType: true,
+        role: {
           select: {
             id: true,
             name: true,
-            level: true,
+            color: true,
+          },
+        },
+        directManager: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           },
         },
         orgUnit: {
@@ -465,89 +267,216 @@ export class CompanyService {
             name: true,
           },
         },
-        isOrgUnitHead: true,
-        subordinates: {
+        customFields: true,
+        _count: {
+          select: {
+            directReports: true,
+          },
+        },
+        createdAt: true,
+      },
+      orderBy: [
+        {
+          userType: 'asc', // OWNER, ADMIN, USER
+        },
+        {
+          name: 'asc',
+        },
+      ],
+    });
+  }
+
+  async updateUserType(dto: UpdateUserTypeDto, requesterId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: dto.userId },
+    });
+
+    if (!user || !user.companyId) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Only OWNER can change user types
+    await this.ensureOwner(requesterId, user.companyId);
+
+    // Cannot demote yourself if you're the only owner
+    if (user.id === requesterId && dto.userType !== UserType.OWNER) {
+      const ownerCount = await this.prisma.user.count({
+        where: {
+          companyId: user.companyId,
+          userType: UserType.OWNER,
+          joinRequestStatus: JoinRequestStatus.APPROVED,
+        },
+      });
+
+      if (ownerCount === 1) {
+        throw new BadRequestException('Cannot demote the only owner');
+      }
+    }
+
+    await this.prisma.user.update({
+      where: { id: dto.userId },
+      data: { userType: dto.userType },
+    });
+
+    return { message: `User type updated to ${dto.userType}` };
+  }
+
+  async assignDirectManager(dto: AssignManagerDto, requesterId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: dto.userId },
+    });
+
+    const manager = await this.prisma.user.findUnique({
+      where: { id: dto.managerId },
+    });
+
+    if (!user || !manager) {
+      throw new NotFoundException('User or manager not found');
+    }
+
+    if (!user.companyId || user.companyId !== manager.companyId) {
+      throw new BadRequestException('Users must be from the same company');
+    }
+
+    // Only Owner or Admin can assign managers
+    await this.ensureOwnerOrAdmin(requesterId, user.companyId);
+
+    // Prevent circular management
+    if (dto.userId === dto.managerId) {
+      throw new BadRequestException('User cannot be their own manager');
+    }
+
+    await this.prisma.user.update({
+      where: { id: dto.userId },
+      data: { directManagerId: dto.managerId },
+    });
+
+    return { message: 'Direct manager assigned successfully' };
+  }
+
+  async removeFromCompany(userId: string, removerId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.companyId) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Only Owner or Admin can remove users
+    await this.ensureOwnerOrAdmin(removerId, user.companyId);
+
+    // Cannot remove an OWNER
+    if (user.userType === UserType.OWNER) {
+      throw new BadRequestException('Cannot remove an owner from the company');
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        companyId: null,
+        userType: UserType.USER,
+        joinRequestStatus: null,
+        directManagerId: null,
+        roleId: null,
+        orgUnitId: null,
+      },
+    });
+
+    return { message: 'User removed from company' };
+  }
+
+  // =====================================================
+  // ORG CHART
+  // =====================================================
+
+  async getOrgChart(companyId: string) {
+    // Get all approved users
+    const users = await this.prisma.user.findMany({
+      where: {
+        companyId,
+        joinRequestStatus: JoinRequestStatus.APPROVED,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        userType: true,
+        directManagerId: true,
+        role: {
           select: {
             id: true,
             name: true,
-            email: true,
-            roleTemplate: {
-              select: {
-                name: true,
-              },
-            },
-            createdAt: true,
+            color: true,
+          },
+        },
+        orgUnit: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            directReports: true,
           },
         },
       },
       orderBy: {
-        roleTemplate: {
-          level: 'asc',
-        },
+        name: 'asc',
       },
     });
 
-    // Transform the data into the expected structure
-    const admins = users
-      .filter((user) => user.roleTemplate?.level === 1)
-      .map((user) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      }));
+    // Build tree structure
+    const userMap = new Map(users.map(u => [u.id, { ...u, children: [] as any[] }]));
+    const roots: any[] = [];
 
-    // Leads are users with level 2 or users who have subordinates (managers)
-    const leads = users
-      .filter((user) => {
-        const level = user.roleTemplate?.level;
-        // Level 2 or users who have subordinates (are managers)
-        return (level === 2 || (level && level > 1 && user.subordinates.length > 0));
-      })
-      .map((user) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        _count: {
-          teamMembers: user.subordinates.length,
-        },
-        teamMembers: user.subordinates.map((sub) => ({
-          id: sub.id,
-          name: sub.name,
-          email: sub.email,
-          role: sub.roleTemplate?.name,
-          createdAt: sub.createdAt,
-        })),
-      }));
+    users.forEach(user => {
+      const node = userMap.get(user.id);
+      if (node && user.directManagerId) {
+        const parent = userMap.get(user.directManagerId);
+        if (parent && parent.children) {
+          parent.children.push(node);
+        } else {
+          roots.push(node);
+        }
+      } else if (node) {
+        roots.push(node);
+      }
+    });
 
-    // Get all user IDs that are admins or leads
-    const adminAndLeadIds = new Set([
-      ...admins.map((a) => a.id),
-      ...leads.map((l) => l.id),
-    ]);
+    return roots;
+  }
 
-    // Get all user IDs that are assigned to leads (subordinates)
-    const assignedMemberIds = new Set(
-      leads.flatMap((lead) => lead.teamMembers.map((m) => m.id)),
-    );
+  // =====================================================
+  // HELPER METHODS
+  // =====================================================
 
-    // Unassigned members are users who are not admins, not leads, and not assigned to any lead
-    const unassignedMembers = users
-      .filter(
-        (user) =>
-          !adminAndLeadIds.has(user.id) && !assignedMemberIds.has(user.id),
-      )
-      .map((user) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.roleTemplate?.name,
-        createdAt: user.createdAt,
-      }));
+  private async ensureOwner(userId: string, companyId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
 
-    return {
-      admins,
-      leads,
-      unassignedMembers,
-    };
+    if (!user || user.companyId !== companyId || user.userType !== UserType.OWNER) {
+      throw new ForbiddenException('Only company owners can perform this action');
+    }
+
+    return user;
+  }
+
+  private async ensureOwnerOrAdmin(userId: string, companyId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (
+      !user ||
+      user.companyId !== companyId ||
+      (user.userType !== UserType.OWNER && user.userType !== UserType.ADMIN)
+    ) {
+      throw new ForbiddenException('Only company owners or admins can perform this action');
+    }
+
+    return user;
   }
 }

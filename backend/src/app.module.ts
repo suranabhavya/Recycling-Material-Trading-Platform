@@ -6,7 +6,11 @@ import { CompanyModule } from './company/company.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { UploadModule } from './upload/upload.module';
 import { MaterialModule } from './material/material.module';
-import { HierarchyModule } from './hierarchy/hierarchy.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { SmartGroupsModule } from './smart-groups/smart-groups.module';
+import { RolesModule } from './roles/roles.module';
+import { BranchesModule } from './branches/branches.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -17,7 +21,11 @@ import { HierarchyModule } from './hierarchy/hierarchy.module';
     CloudinaryModule,
     UploadModule,
     MaterialModule,
-    HierarchyModule,
+    PermissionsModule,
+    SmartGroupsModule,
+    RolesModule,
+    BranchesModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
