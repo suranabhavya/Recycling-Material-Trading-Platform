@@ -6,6 +6,9 @@ import 'package:recycling_platform/features/auth/presentation/screens/reset_pass
 import 'package:recycling_platform/features/auth/presentation/screens/splash_screen.dart';
 import 'package:recycling_platform/features/auth/presentation/screens/verify_otp_screen.dart';
 import 'package:recycling_platform/features/company/presentation/screens/company_selection_screen.dart';
+import 'package:recycling_platform/features/company/presentation/screens/company_empty_state_screen.dart';
+import 'package:recycling_platform/features/company/presentation/screens/request_access_screen.dart';
+import 'package:recycling_platform/features/company/presentation/screens/company_success_screen.dart';
 import 'package:recycling_platform/features/company/presentation/screens/manage_approvals_screen.dart';
 import 'package:recycling_platform/features/company/presentation/screens/pending_approval_screen.dart';
 import 'package:recycling_platform/features/company/presentation/screens/register_company_screen.dart';
@@ -30,6 +33,9 @@ class AppRouter {
   static const String forgotPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
   static const String companySelection = '/company-selection';
+  static const String companyEmptyState = '/company-empty-state';
+  static const String requestAccess = '/request-access';
+  static const String companySuccess = '/company-success';
   static const String registerCompany = '/register-company';
   static const String pendingApproval = '/pending-approval';
   static const String manageApprovals = '/manage-approvals';
@@ -82,6 +88,21 @@ class AppRouter {
       GoRoute(
         path: companySelection,
         builder: (context, state) => const CompanySelectionScreen(),
+      ),
+      GoRoute(
+        path: companyEmptyState,
+        builder: (context, state) => const CompanyEmptyStateScreen(),
+      ),
+      GoRoute(
+        path: requestAccess,
+        builder: (context, state) => const RequestAccessScreen(),
+      ),
+      GoRoute(
+        path: companySuccess,
+        builder: (context, state) {
+          final companyName = state.uri.queryParameters['name'] ?? 'Your Company';
+          return CompanySuccessScreen(companyName: companyName);
+        },
       ),
       GoRoute(
         path: registerCompany,

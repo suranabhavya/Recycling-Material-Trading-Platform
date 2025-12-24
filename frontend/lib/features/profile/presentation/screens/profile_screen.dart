@@ -106,8 +106,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
+<<<<<<< Updated upstream
     final isAdmin = user?.role?.toUpperCase() == 'ADMIN';
     final userRole = user?.role;
+=======
+    final hasRoleTemplate = user?.roleTemplate != null;
+    final isAdmin = user?.roleTemplate?.isAdmin ?? false;
+    // Use level-based check first, then fallback to name
+    final userRole = hasRoleTemplate
+        ? (isAdmin ? 'ADMIN' : (user?.roleTemplate?.name.toUpperCase() ?? 'MEMBER'))
+        : null;
+>>>>>>> Stashed changes
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -220,21 +229,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ).animate().fadeIn(duration: 600.ms, delay: 200.ms).slideY(begin: 0.2, end: 0),
             
-            const SizedBox(height: 20),
+            if (hasRoleTemplate) const SizedBox(height: 20),
             
             // Quick Info Cards
             Row(
               children: [
-                Expanded(
-                  child: _buildInfoCard(
-                    icon: _getRoleIcon(userRole),
-                    label: 'Role',
-                    value: _getRoleDisplayName(userRole),
-                    color: _getRoleColor(userRole),
+                if (hasRoleTemplate) ...[
+                  Expanded(
+                    child: _buildInfoCard(
+                      icon: _getRoleIcon(userRole),
+                      label: 'Role',
+                      value: _getRoleDisplayName(userRole),
+                      color: _getRoleColor(userRole),
+                    ),
                   ),
-                ),
-                if (user.company != null) ...[
-                  const SizedBox(width: 12),
+                  if (user.company != null) const SizedBox(width: 12),
+                ],
+                if (user.company != null)
                   Expanded(
                     child: _buildInfoCard(
                       icon: Icons.business,
@@ -245,11 +256,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       color: AppColors.primary,
                     ),
                   ),
-                ],
               ],
             ).animate().fadeIn(duration: 600.ms, delay: 300.ms),
             
-            if (user.companyApprovalStatus != null) ...[
+            if (hasRoleTemplate && user.companyApprovalStatus != null) ...[
               const SizedBox(height: 12),
               _buildInfoCard(
                 icon: Icons.verified_user,
@@ -285,7 +295,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 12),
             
             // Lead Dashboard (Lead Only)
+<<<<<<< Updated upstream
             if (userRole?.toUpperCase() == 'LEAD') ...[
+=======
+            if (hasRoleTemplate && (userRole?.toUpperCase() == 'LEAD')) ...[
+>>>>>>> Stashed changes
               _buildSettingsButton(
                 icon: Icons.dashboard_outlined,
                 label: 'Lead Dashboard',

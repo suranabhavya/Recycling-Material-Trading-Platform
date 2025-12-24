@@ -72,6 +72,12 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
     String? phone,
     String? address,
     required String type,
+<<<<<<< Updated upstream
+=======
+    required String hierarchyMode,
+    required List<dynamic> roleTemplates,
+    List<dynamic>? orgUnits,
+>>>>>>> Stashed changes
   }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -81,6 +87,14 @@ class CompanyNotifier extends StateNotifier<CompanyState> {
         phone: phone,
         address: address,
         type: type,
+<<<<<<< Updated upstream
+=======
+        hierarchyMode: hierarchyMode,
+        roleTemplates: roleTemplates.map((role) => role.toJson() as Map<String, dynamic>).toList(),
+        orgUnits: orgUnits != null && orgUnits.isNotEmpty
+            ? orgUnits.map((unit) => unit.toJson() as Map<String, dynamic>).toList()
+            : null,
+>>>>>>> Stashed changes
       );
       
       // Refresh user data to get updated role and status

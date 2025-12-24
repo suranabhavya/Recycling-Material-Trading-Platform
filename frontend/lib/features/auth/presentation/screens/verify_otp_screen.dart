@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recycling_platform/core/router/app_router.dart';
 import 'package:recycling_platform/core/theme/app_colors.dart';
 import 'package:recycling_platform/core/utils/color_extensions.dart';
 import 'package:recycling_platform/features/auth/presentation/providers/auth_provider.dart';
@@ -49,7 +50,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Email verified successfully!'), backgroundColor: AppColors.success),
         );
-        context.go('/company-selection');
+        context.go(AppRouter.home);
       }
     });
 
@@ -136,7 +137,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
                           TextField(
                             controller: _otpController,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 16,
@@ -147,7 +148,7 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
                             decoration: InputDecoration(
                               hintText: '000000',
                               hintStyle: TextStyle(
-                                color: Colors.white.withOpacityValue(0.3),
+                                color: AppColors.textSecondary,
                                 letterSpacing: 16,
                               ),
                               counterText: '',

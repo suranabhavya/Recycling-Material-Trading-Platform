@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recycling_platform/core/theme/app_colors.dart';
 import 'package:recycling_platform/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:recycling_platform/features/home/presentation/widgets/custom_bottom_nav_bar.dart';
+import 'package:recycling_platform/features/profile/presentation/screens/company_settings_screen.dart';
 import 'package:recycling_platform/features/profile/presentation/screens/profile_screen.dart';
 import 'package:recycling_platform/features/scrap/presentation/screens/add_scrap_screen.dart';
 
@@ -19,6 +20,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<Widget> _screens = const [
     DashboardScreen(),
     AddScrapScreen(),
+    CompanySettingsScreen(),
     ProfileScreen(),
   ];
 
