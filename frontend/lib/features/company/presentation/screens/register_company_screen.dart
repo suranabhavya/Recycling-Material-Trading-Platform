@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recycling_platform/core/router/app_router.dart';
 import 'package:recycling_platform/core/theme/app_colors.dart';
-import 'package:recycling_platform/features/company/presentation/providers/company_provider.dart';
-import 'package:recycling_platform/features/hierarchy/data/models/role_template_model.dart';
+import 'package:recycling_platform/features/auth/presentation/providers/auth_provider.dart';
 
 class RegisterCompanyScreen extends ConsumerStatefulWidget {
   const RegisterCompanyScreen({super.key});
@@ -16,50 +16,57 @@ class RegisterCompanyScreen extends ConsumerStatefulWidget {
 class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
-  
-  // Step 1: Company Basic Info
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
-  String _selectedType = 'AUTOMOBILE';
-  
-  // Step 2: Hierarchy Mode
-  String _hierarchyMode = 'SIMPLE';
-  
-  // Step 3: Roles
-  final List<RoleTemplateModel> _roleTemplates = [];
-  int _currentLevel = 1;
 
-  @override
-  void initState() {
-    super.initState();
-    // Initialize with default admin role
-    _roleTemplates.add(RoleTemplateModel(
-      name: 'Admin',
-      level: 1,
-      permissions: {'all': true},
-      requiresApproval: false,
-      description: 'Top-level administrator with full permissions',
-    ));
-    _currentLevel = 2;
-  }
+  // Step 1: User Information
+  final _step1FormKey = GlobalKey<FormState>();
+  final _userFirstNameController = TextEditingController();
+  final _userLastNameController = TextEditingController();
+  final _userEmailController = TextEditingController();
+  final _userPasswordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  // Step 2: Company Information
+  final _step2FormKey = GlobalKey<FormState>();
+  final _companyNameController = TextEditingController();
+  final _companyEmailController = TextEditingController();
+  final _companyPhoneController = TextEditingController();
+  final _companyAddressController = TextEditingController();
+
+  // Step 3: Business Industry
+  String? _selectedIndustry;
+  String? _selectedSubtype;
+
+  final Map<String, List<String>> industries = {
+    'Construction': ['General Contractor', 'Electrical', 'Plumbing', 'HVAC', 'Carpentry'],
+    'Healthcare': ['Hospital', 'Clinic', 'Dental', 'Home Care', 'Medical Services'],
+    'Food & Beverage': ['Restaurant', 'Catering', 'Food Truck', 'Bakery', 'Bar'],
+    'Retail': ['Clothing Store', 'Electronics', 'Grocery', 'Furniture', 'General'],
+    'Cleaning': ['Commercial', 'Residential', 'Janitorial', 'Specialized'],
+    'Manufacturing': ['Production', 'Assembly', 'Processing', 'Packaging'],
+    'Recycling': ['Metal Recycling', 'Plastic Recycling', 'E-Waste', 'Paper Recycling', 'General Recycling'],
+    'Security': ['Private Security', 'Event Security', 'Corporate Security'],
+    'Accommodation': ['Hotel', 'Motel', 'B&B', 'Hostel'],
+    'Transportation': ['Logistics', 'Delivery', 'Moving', 'Taxi/Ride Share'],
+    'Other': ['Specify in address'],
+  };
 
   @override
   void dispose() {
     _pageController.dispose();
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
+    _userFirstNameController.dispose();
+    _userLastNameController.dispose();
+    _userEmailController.dispose();
+    _userPasswordController.dispose();
+    _companyNameController.dispose();
+    _companyEmailController.dispose();
+    _companyPhoneController.dispose();
+    _companyAddressController.dispose();
     super.dispose();
   }
 
   void _nextStep() {
     if (_currentStep == 0) {
-      // Validate step 1
-      if (_formKey.currentState?.validate() ?? false) {
+      if (_step1FormKey.currentState?.validate() ?? false) {
         _pageController.nextPage(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -67,12 +74,13 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
         setState(() => _currentStep = 1);
       }
     } else if (_currentStep == 1) {
-      // Move to step 3
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-      setState(() => _currentStep = 2);
+      if (_step2FormKey.currentState?.validate() ?? false) {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+        setState(() => _currentStep = 2);
+      }
     }
   }
 
@@ -86,433 +94,306 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
     }
   }
 
-  void _submit() {
-    // Validate required fields manually since form is on a different page
-    if (_nameController.text.trim().isEmpty) {
+  Future<void> _submit() async {
+    if (_selectedIndustry == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Company name is required'),
+          content: Text('Please select a business industry'),
           backgroundColor: AppColors.error,
         ),
       );
       return;
     }
 
-    if (_emailController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Company email is required'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    if (!_emailController.text.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid email address'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    if (_roleTemplates.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('At least one role is required'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    // All validations passed, submit the form
-    ref.read(companyProvider.notifier).createCompany(
-      context,
-      name: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
-      address: _addressController.text.trim().isEmpty ? null : _addressController.text.trim(),
-      type: _selectedType,
-      hierarchyMode: _hierarchyMode,
-      roleTemplates: _roleTemplates,
+    // Call the registerCompany API
+    await ref.read(authProvider.notifier).registerCompany(
+      firstName: _userFirstNameController.text,
+      lastName: _userLastNameController.text,
+      email: _userEmailController.text,
+      password: _userPasswordController.text,
+      companyName: _companyNameController.text,
+      companyEmail: _companyEmailController.text.isEmpty ? null : _companyEmailController.text,
+      companyPhone: _companyPhoneController.text.isEmpty ? null : _companyPhoneController.text,
+      companyAddress: _companyAddressController.text.isEmpty ? null : _companyAddressController.text,
+      industry: _selectedIndustry!,
+      subtype: _selectedSubtype,
     );
+
+    // Check for errors
+    final authState = ref.read(authProvider);
+    if (authState.error != null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authState.error!),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Navigate to OTP verification with the user's email
+    if (mounted) {
+      context.go('${AppRouter.verifyOtp}?email=${Uri.encodeComponent(_userEmailController.text)}');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final companyState = ref.watch(companyProvider);
-
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(color: AppColors.background),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-                          onPressed: () => context.pop(),
-                        ),
-                      ],
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  if (_currentStep > 0)
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+                      onPressed: _previousStep,
+                    )
+                  else
+                    IconButton(
+                      icon: const Icon(Icons.close, color: AppColors.textPrimary),
+                      onPressed: () => context.go(AppRouter.welcome),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Register Company',
-                      style: GoogleFonts.domine(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Step ${_currentStep + 1} of 3',
-                      style: GoogleFonts.domine(
-                        fontSize: 16,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // Stepper Indicator
-                    _buildStepper(),
-                  ],
+                ],
+              ),
+            ),
+
+            // Progress indicator
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: (_currentStep + 1) / 3,
+                  backgroundColor: AppColors.border,
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  minHeight: 8,
                 ),
               ),
-              
-              // Content
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _buildStep1(),
-                    _buildStep2(),
-                    _buildStep3(),
-                  ],
-                ),
+            ),
+
+            // Content
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _buildStep1(),
+                  _buildStep2(),
+                  _buildStep3(),
+                ],
               ),
-              
-              // Navigation Buttons
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Row(
-                  children: [
-                    if (_currentStep > 0)
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: _previousStep,
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: AppColors.border),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: Text(
-                            'Previous',
-                            style: GoogleFonts.domine(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (_currentStep > 0) const SizedBox(width: 12),
-                    Expanded(
-                      child: Container(
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: ElevatedButton(
-                          onPressed: companyState.isLoading
-                              ? null
-                              : _currentStep == 2
-                                  ? _submit
-                                  : _nextStep,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                          ),
-                          child: companyState.isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : Text(
-                                  _currentStep == 2 ? 'Register Company' : 'Next',
-                                  style: GoogleFonts.domine(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
-                      ),
+            ),
+
+            // Bottom Button
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _currentStep == 2 ? _submit : _nextStep,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
                     ),
-                  ],
+                  ),
+                  child: Text(
+                    _currentStep == 2 ? "Let's go!" : 'Next step',
+                    style: GoogleFonts.domine(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildStepper() {
-    return Row(
-      children: [
-        _buildStepIndicator(0, 'Company Info', _currentStep >= 0),
-        _buildStepConnector(_currentStep > 0),
-        _buildStepIndicator(1, 'Hierarchy', _currentStep >= 1),
-        _buildStepConnector(_currentStep > 1),
-        _buildStepIndicator(2, 'Roles', _currentStep >= 2),
-      ],
-    );
-  }
-
-  Widget _buildStepIndicator(int step, String label, bool isActive) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: isActive ? AppColors.primary : AppColors.surface,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Center(
-              child: isActive
-                  ? const Icon(Icons.check, color: Colors.white, size: 20)
-                  : Text(
-                      '${step + 1}',
-                      style: GoogleFonts.domine(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: GoogleFonts.domine(
-              fontSize: 12,
-              color: isActive ? AppColors.textPrimary : AppColors.textTertiary,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStepConnector(bool isActive) {
-    return Container(
-      height: 2,
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primary : AppColors.border,
-        borderRadius: BorderRadius.circular(1),
       ),
     );
   }
 
   Widget _buildStep1() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: AppColors.border,
-            width: 1.5,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(24),
+      child: Form(
+        key: _step1FormKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            Text(
+              'A small step for you.\nA giant step for your\nbusiness.',
+              style: GoogleFonts.domine(
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                color: AppColors.textPrimary,
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            // First Name & Last Name
+            Row(
               children: [
-                Text(
-                  'Company Information',
-                  style: GoogleFonts.domine(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                Expanded(
+                  child: TextFormField(
+                    controller: _userFirstNameController,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'First Name',
+                      hintStyle: GoogleFonts.domine(color: AppColors.textTertiary),
+                      filled: false,
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                      errorBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.error),
+                      ),
+                    ),
+                    validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Enter your company\'s basic details',
-                  style: GoogleFonts.domine(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextFormField(
+                    controller: _userLastNameController,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'Last Name',
+                      hintStyle: GoogleFonts.domine(color: AppColors.textTertiary),
+                      filled: false,
+                      enabledBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                      errorBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.error),
+                      ),
+                    ),
+                    validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
                   ),
-                ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: _nameController,
-                  style: const TextStyle(color: AppColors.textPrimary),
-                  decoration: InputDecoration(
-                    labelText: 'Company Name',
-                    labelStyle: const TextStyle(color: AppColors.textSecondary),
-                    prefixIcon: const Icon(Icons.business, color: AppColors.textSecondary),
-                    filled: true,
-                    fillColor: AppColors.background,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                    ),
-                  ),
-                  validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailController,
-                  style: const TextStyle(color: AppColors.textPrimary),
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: 'Company Email',
-                    labelStyle: const TextStyle(color: AppColors.textSecondary),
-                    prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondary),
-                    filled: true,
-                    fillColor: AppColors.background,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) return 'Required';
-                    if (!value!.contains('@')) return 'Invalid email';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _phoneController,
-                  style: const TextStyle(color: AppColors.textPrimary),
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: 'Phone (Optional)',
-                    labelStyle: const TextStyle(color: AppColors.textSecondary),
-                    prefixIcon: const Icon(Icons.phone, color: AppColors.textSecondary),
-                    filled: true,
-                    fillColor: AppColors.background,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _addressController,
-                  style: const TextStyle(color: AppColors.textPrimary),
-                  maxLines: 2,
-                  decoration: InputDecoration(
-                    labelText: 'Address (Optional)',
-                    labelStyle: const TextStyle(color: AppColors.textSecondary),
-                    prefixIcon: const Icon(Icons.location_on, color: AppColors.textSecondary),
-                    filled: true,
-                    fillColor: AppColors.background,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _selectedType,
-                  decoration: InputDecoration(
-                    labelText: 'Company Type',
-                    labelStyle: GoogleFonts.domine(
-                      color: AppColors.textSecondary,
-                      fontSize: 14,
-                    ),
-                    prefixIcon: const Icon(Icons.category, color: AppColors.textSecondary),
-                    filled: true,
-                    fillColor: AppColors.background,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                    ),
-                  ),
-                  dropdownColor: AppColors.surface,
-                  style: GoogleFonts.domine(color: AppColors.textPrimary, fontSize: 14),
-                  icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
-                  items: [
-                    DropdownMenuItem(value: 'AUTOMOBILE', child: Text('Automobile', style: GoogleFonts.domine(color: AppColors.textPrimary))),
-                    DropdownMenuItem(value: 'RECYCLING', child: Text('Recycling', style: GoogleFonts.domine(color: AppColors.textPrimary))),
-                    DropdownMenuItem(value: 'MANUFACTURING', child: Text('Manufacturing', style: GoogleFonts.domine(color: AppColors.textPrimary))),
-                    DropdownMenuItem(value: 'OTHERS', child: Text('Others', style: GoogleFonts.domine(color: AppColors.textPrimary))),
-                  ],
-                  onChanged: (value) => setState(() => _selectedType = value!),
                 ),
               ],
             ),
-          ),
+
+            const SizedBox(height: 24),
+
+            // Business Email
+            TextFormField(
+              controller: _userEmailController,
+              style: const TextStyle(color: AppColors.textPrimary),
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                hintText: 'Business email',
+                hintStyle: GoogleFonts.domine(color: AppColors.textTertiary),
+                filled: false,
+                enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.error),
+                ),
+              ),
+              validator: (value) {
+                if (value?.isEmpty ?? true) return 'Required';
+                if (!value!.contains('@')) return 'Invalid email';
+                return null;
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            // Password
+            TextFormField(
+              controller: _userPasswordController,
+              style: const TextStyle(color: AppColors.textPrimary),
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                hintText: 'Create a password',
+                hintStyle: GoogleFonts.domine(color: AppColors.textTertiary),
+                filled: false,
+                enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.error),
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    color: AppColors.textSecondary,
+                  ),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                ),
+              ),
+              validator: (value) {
+                if (value?.isEmpty ?? true) return 'Required';
+                if (value!.length < 6) return 'Minimum 6 characters';
+                return null;
+              },
+            ),
+
+            const SizedBox(height: 8),
+            Text(
+              'Choose wisely',
+              style: GoogleFonts.domine(
+                fontSize: 12,
+                color: AppColors.textTertiary,
+              ),
+            ),
+
+            const SizedBox(height: 60),
+
+            // Login link
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Already have an account? ',
+                    style: GoogleFonts.domine(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => context.go(AppRouter.login),
+                    child: Text(
+                      'Log in',
+                      style: GoogleFonts.domine(
+                        fontSize: 14,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -520,134 +401,102 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
 
   Widget _buildStep2() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: AppColors.border,
-            width: 1.5,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Hierarchy Configuration',
-                style: GoogleFonts.domine(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Choose how your company hierarchy will be structured',
-                style: GoogleFonts.domine(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildModeOption('SIMPLE', 'Simple', 'Role-based hierarchy with manager relationships'),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildModeOption('ADVANCED', 'Advanced', 'Full organizational tree with units'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline, color: AppColors.textSecondary, size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _hierarchyMode == 'SIMPLE'
-                            ? 'Simple mode uses role levels and direct manager relationships. Perfect for smaller organizations.'
-                            : 'Advanced mode includes organizational units for geographic or departmental structure. Best for larger companies.',
-                        style: GoogleFonts.domine(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModeOption(String value, String title, String subtitle) {
-    final isSelected = _hierarchyMode == value;
-    return GestureDetector(
-      onTap: () => setState(() => _hierarchyMode = value),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.background,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
+      padding: const EdgeInsets.all(24),
+      child: Form(
+        key: _step2FormKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isSelected ? AppColors.primary : AppColors.border,
-                      width: 2,
-                    ),
-                    color: isSelected ? AppColors.primary : Colors.transparent,
-                  ),
-                  child: isSelected
-                      ? const Icon(Icons.check, size: 16, color: Colors.white)
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: GoogleFonts.domine(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
             Text(
-              subtitle,
+              '${_userFirstNameController.text.isNotEmpty ? _userFirstNameController.text : 'Hi'}, what\'s your\ncompany name?',
               style: GoogleFonts.domine(
-                fontSize: 13,
-                color: AppColors.textSecondary,
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                color: AppColors.textPrimary,
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            // Company Name
+            TextFormField(
+              controller: _companyNameController,
+              style: const TextStyle(color: AppColors.textPrimary),
+              decoration: InputDecoration(
+                hintText: 'Enter company name',
+                hintStyle: GoogleFonts.domine(color: AppColors.textTertiary),
+                filled: false,
+                enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+                errorBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.error),
+                ),
+              ),
+              validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+            ),
+
+            const SizedBox(height: 24),
+
+            // Company Email (Optional)
+            TextFormField(
+              controller: _companyEmailController,
+              style: const TextStyle(color: AppColors.textPrimary),
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                hintText: 'Company contact email (Optional)',
+                hintStyle: GoogleFonts.domine(color: AppColors.textTertiary),
+                filled: false,
+                enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Company Phone (Optional)
+            TextFormField(
+              controller: _companyPhoneController,
+              style: const TextStyle(color: AppColors.textPrimary),
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                hintText: 'Company phone (Optional)',
+                hintStyle: GoogleFonts.domine(color: AppColors.textTertiary),
+                filled: false,
+                enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Company Address (Optional)
+            TextFormField(
+              controller: _companyAddressController,
+              style: const TextStyle(color: AppColors.textPrimary),
+              maxLines: 2,
+              decoration: InputDecoration(
+                hintText: 'Company address (Optional)',
+                hintStyle: GoogleFonts.domine(color: AppColors.textTertiary),
+                filled: false,
+                enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
               ),
             ),
           ],
@@ -658,269 +507,98 @@ class _RegisterCompanyScreenState extends ConsumerState<RegisterCompanyScreen> {
 
   Widget _buildStep3() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: AppColors.border,
-            width: 1.5,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Define Roles & Approval Flow',
-                style: GoogleFonts.domine(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Level 1 is the highest authority. Lower levels may require approval from higher levels.',
-                style: GoogleFonts.domine(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ..._roleTemplates.asMap().entries.map((entry) {
-                final index = entry.key;
-                final role = entry.value;
-                return _RoleCard(
-                  role: role,
-                  isAdmin: index == 0,
-                  onUpdate: (updated) {
-                    setState(() {
-                      _roleTemplates[index] = updated;
-                    });
-                  },
-                  onRemove: () {
-                    if (index != 0) {
-                      setState(() {
-                        _roleTemplates.removeAt(index);
-                        _reorderLevels();
-                      });
-                    }
-                  },
-                );
-              }),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _roleTemplates.add(RoleTemplateModel(
-                      name: 'Role $_currentLevel',
-                      level: _currentLevel,
-                      permissions: {},
-                      requiresApproval: true,
-                    ));
-                    _currentLevel++;
-                  });
-                },
-                icon: const Icon(Icons.add, color: AppColors.textPrimary),
-                label: Text(
-                  'Add Role Level',
-                  style: GoogleFonts.domine(color: AppColors.textPrimary),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.border),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _reorderLevels() {
-    for (int i = 0; i < _roleTemplates.length; i++) {
-      _roleTemplates[i] = _roleTemplates[i].copyWith(level: i + 1);
-    }
-    _currentLevel = _roleTemplates.length + 1;
-  }
-}
-
-class _RoleCard extends StatefulWidget {
-  final RoleTemplateModel role;
-  final bool isAdmin;
-  final Function(RoleTemplateModel) onUpdate;
-  final VoidCallback onRemove;
-
-  const _RoleCard({
-    required this.role,
-    required this.isAdmin,
-    required this.onUpdate,
-    required this.onRemove,
-  });
-
-  @override
-  State<_RoleCard> createState() => _RoleCardState();
-}
-
-class _RoleCardState extends State<_RoleCard> {
-  late TextEditingController _nameController;
-  late TextEditingController _descriptionController;
-  late bool _requiresApproval;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController(text: widget.role.name);
-    _descriptionController = TextEditingController(text: widget.role.description ?? '');
-    _requiresApproval = widget.role.requiresApproval;
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  void _updateRole() {
-    widget.onUpdate(widget.role.copyWith(
-      name: _nameController.text,
-      description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
-      requiresApproval: _requiresApproval,
-    ));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
+      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          const SizedBox(height: 20),
+          Text(
+            'What is your business\nindustry?',
+            style: GoogleFonts.domine(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 30),
+
+          // Industry list
+          ...industries.keys.map((industry) {
+            final icon = _getIndustryIcon(industry);
+            final isSelected = _selectedIndustry == industry;
+
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedIndustry = industry;
+                  _selectedSubtype = null; // Reset subtype when industry changes
+                });
+              },
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 decoration: BoxDecoration(
-                  color: widget.isAdmin
-                      ? AppColors.warning.withValues(alpha: 0.2)
-                      : AppColors.primary.withValues(alpha: 0.2),
+                  color: isSelected
+                      ? AppColors.primary.withValues(alpha: 0.1)
+                      : AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: widget.isAdmin ? AppColors.warning : AppColors.primary,
+                    color: isSelected ? AppColors.primary : AppColors.border,
+                    width: isSelected ? 2 : 1,
                   ),
                 ),
-                child: Text(
-                  'Level ${widget.role.level}',
-                  style: GoogleFonts.domine(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+                child: Row(
+                  children: [
+                    Text(
+                      icon,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      industry,
+                      style: GoogleFonts.domine(
+                        fontSize: 16,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              if (!widget.isAdmin)
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                  onPressed: widget.onRemove,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _nameController,
-            enabled: !widget.isAdmin,
-            style: GoogleFonts.domine(color: AppColors.textPrimary),
-            decoration: InputDecoration(
-              labelText: 'Role Name',
-              labelStyle: GoogleFonts.domine(color: AppColors.textSecondary),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.primary),
-              ),
-            ),
-            onChanged: (_) => _updateRole(),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _descriptionController,
-            style: GoogleFonts.domine(color: AppColors.textPrimary),
-            maxLines: 2,
-            decoration: InputDecoration(
-              labelText: 'Description (optional)',
-              labelStyle: GoogleFonts.domine(color: AppColors.textSecondary),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.primary),
-              ),
-            ),
-            onChanged: (_) => _updateRole(),
-          ),
-          if (!widget.isAdmin) ...[
-            const SizedBox(height: 12),
-            CheckboxListTile(
-              title: Text(
-                'Requires Approval',
-                style: GoogleFonts.domine(
-                  fontSize: 14,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              subtitle: Text(
-                'Materials created by this role need approval from higher levels',
-                style: GoogleFonts.domine(
-                  fontSize: 11,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              value: _requiresApproval,
-              onChanged: (value) {
-                setState(() {
-                  _requiresApproval = value ?? false;
-                });
-                _updateRole();
-              },
-              activeColor: AppColors.success,
-              checkColor: Colors.white,
-              contentPadding: EdgeInsets.zero,
-            ),
-          ],
+            );
+          }),
+
+          const SizedBox(height: 20),
         ],
       ),
     );
+  }
+
+  String _getIndustryIcon(String industry) {
+    switch (industry) {
+      case 'Construction':
+        return '🛠️';
+      case 'Healthcare':
+        return '❤️';
+      case 'Food & Beverage':
+        return '🍴';
+      case 'Retail':
+        return '🛍️';
+      case 'Cleaning':
+        return '🧹';
+      case 'Manufacturing':
+        return '🏭';
+      case 'Recycling':
+        return '♻️';
+      case 'Security':
+        return '🛡️';
+      case 'Accommodation':
+        return '🏨';
+      case 'Transportation':
+        return '🚛';
+      default:
+        return '📋';
+    }
   }
 }

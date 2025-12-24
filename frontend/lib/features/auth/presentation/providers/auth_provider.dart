@@ -67,6 +67,43 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> registerCompany({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+    required String companyName,
+    String? companyEmail,
+    String? companyPhone,
+    String? companyAddress,
+    required String industry,
+    String? subtype,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _repository.registerCompany(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: password,
+        companyName: companyName,
+        companyEmail: companyEmail,
+        companyPhone: companyPhone,
+        companyAddress: companyAddress,
+        industry: industry,
+        subtype: subtype,
+      );
+      state = AuthState(registrationSuccess: true);
+    } on DioException catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.response?.data['message'] ?? 'Registration failed',
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: 'An error occurred');
+    }
+  }
+
   Future<void> verifyOtp(String email, String otp) async {
     state = state.copyWith(isLoading: true, error: null);
     try {

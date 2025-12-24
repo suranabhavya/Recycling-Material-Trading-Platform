@@ -14,41 +14,41 @@ class CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.transparent,
-      padding: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
-      child: Container(
-        height: 60,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(35),
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: AppColors.shadow,
-          //     blurRadius: 20,
-          //     offset: const Offset(0, -5),
-          //   ),
-          // ],
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          top: BorderSide(
+            color: AppColors.border.withValues(alpha: 0.2),
+            width: 1,
+          ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(
-              icon: Icons.dashboard_rounded,
-              index: 0,
-            ),
-            _buildNavItem(
-              icon: Icons.add_circle_rounded,
-              index: 1,
-            ),
-            _buildNavItem(
-              icon: Icons.business_rounded,
-              index: 2,
-            ),
-            _buildNavItem(
-              icon: Icons.person_rounded,
-              index: 3,
-            ),
-          ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Container(
+          height: 55,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(
+                icon: Icons.dashboard_rounded,
+                index: 0,
+              ),
+              _buildNavItem(
+                icon: Icons.add_circle_rounded,
+                index: 1,
+              ),
+              _buildNavItem(
+                icon: Icons.business_rounded,
+                index: 2,
+              ),
+              _buildNavItem(
+                icon: Icons.person_rounded,
+                index: 3,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -59,23 +59,33 @@ class CustomBottomNavBar extends StatelessWidget {
     required int index,
   }) {
     final isSelected = currentIndex == index;
-    
-    return GestureDetector(
-      onTap: () => onTap(index),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryDarker : Colors.transparent,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: isSelected ? Colors.white : AppColors.primaryDarker,
-          size: 28,
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => onTap(index),
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                size: 30,
+              ),
+              const SizedBox(height: 2),
+              // Indicator dot
+              // Container(
+              //   width: 4,
+              //   height: 4,
+              //   decoration: BoxDecoration(
+              //     color: isSelected ? AppColors.primary : Colors.transparent,
+              //     shape: BoxShape.circle,
+              //   ),
+              // ),
+            ],
+          ),
         ),
       ),
     );

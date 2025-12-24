@@ -5,6 +5,7 @@ import 'package:recycling_platform/features/auth/presentation/screens/register_s
 import 'package:recycling_platform/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:recycling_platform/features/auth/presentation/screens/splash_screen.dart';
 import 'package:recycling_platform/features/auth/presentation/screens/verify_otp_screen.dart';
+import 'package:recycling_platform/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:recycling_platform/features/company/presentation/screens/company_selection_screen.dart';
 import 'package:recycling_platform/features/company/presentation/screens/manage_approvals_screen.dart';
 import 'package:recycling_platform/features/company/presentation/screens/pending_approval_screen.dart';
@@ -26,6 +27,7 @@ import 'package:recycling_platform/features/lead/presentation/screens/lead_dashb
 
 class AppRouter {
   static const String splash = '/';
+  static const String welcome = '/welcome';
   static const String login = '/login';
   static const String register = '/register';
   static const String verifyOtp = '/verify-otp';
@@ -56,6 +58,10 @@ class AppRouter {
       GoRoute(
         path: splash,
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: welcome,
+        builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
         path: login,

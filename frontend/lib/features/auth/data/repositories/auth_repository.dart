@@ -20,6 +20,35 @@ class AuthRepository {
     );
   }
 
+  Future<void> registerCompany({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+    required String companyName,
+    String? companyEmail,
+    String? companyPhone,
+    String? companyAddress,
+    required String industry,
+    String? subtype,
+  }) async {
+    await _dio.post(
+      '${AppConstants.baseUrl}/auth/register-company',
+      data: {
+        'firstName': firstName,
+        'lastName': lastName,
+        'email': email,
+        'password': password,
+        'companyName': companyName,
+        'companyEmail': companyEmail,
+        'companyPhone': companyPhone,
+        'companyAddress': companyAddress,
+        'industry': industry,
+        'subtype': subtype,
+      },
+    );
+  }
+
   Future<AuthResponse> verifyOtp(String email, String otp) async {
     final response = await _dio.post(
       '${AppConstants.baseUrl}/auth/verify-otp',

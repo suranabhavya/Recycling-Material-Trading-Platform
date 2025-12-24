@@ -56,13 +56,28 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
       body: Container(
         decoration: const BoxDecoration(color: AppColors.background),
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.email_outlined, size: 80, color: AppColors.primary),
+          child: Column(
+            children: [
+              // Back button
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
+                    onPressed: () => context.pop(),
+                  ),
+                ),
+              ),
+
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.email_outlined, size: 80, color: AppColors.primary),
                   
                   const SizedBox(height: 20),
                   
@@ -213,14 +228,17 @@ class _VerifyOtpScreenState extends ConsumerState<VerifyOtpScreen> {
                         ),
                       ),
                     ],
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
 

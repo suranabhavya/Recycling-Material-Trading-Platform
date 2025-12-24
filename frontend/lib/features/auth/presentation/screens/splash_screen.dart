@@ -21,9 +21,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
-    
+
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) context.go(AppRouter.login);
+      if (mounted) context.go(AppRouter.welcome);
     });
   }
 
